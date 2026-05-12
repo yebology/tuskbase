@@ -21,6 +21,8 @@ export interface StoredMemory {
   txDigest: string;
   trustScore: number;
   timestamp: string;
+  /** Blob ID from MemWal SDK (encrypted memory on Walrus) */
+  memwalBlobId?: string;
 }
 
 export interface SearchResult {

@@ -21,7 +21,7 @@ export class AIService {
         {
           role: "system",
           content:
-            "You are a research assistant. Extract 1-3 key factual claims from the given content. Each fact should be a single, verifiable statement. Return as a JSON array of strings.",
+            'You are a research assistant. Extract 1-3 key factual claims from the given content. Each fact should be a single, verifiable statement. Return a JSON object with a "facts" key containing an array of strings. Example: {"facts": ["fact 1", "fact 2"]}',
         },
         {
           role: "user",
@@ -33,8 +33,12 @@ export class AIService {
     });
 
     const text = response.choices[0]?.message?.content ?? '{"facts":[]}';
-    const parsed = JSON.parse(text);
-    return parsed.facts ?? [];
+    try {
+      const parsed = JSON.parse(text);
+      return Array.isArray(parsed.facts) ? parsed.facts : [];
+    } catch {
+      return [];
+    }
   }
 
   /** Generate a research summary from multiple findings */

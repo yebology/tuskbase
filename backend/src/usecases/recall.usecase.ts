@@ -1,6 +1,6 @@
 /**
  * Recall Use Case — retrieves relevant memories via semantic search.
- * Queries MemWal and enriches results with on-chain metadata.
+ * Queries MemWal SDK and returns results with relevance scores.
  */
 
 import type { MemwalService } from "../services/memwal.service.js";
@@ -9,7 +9,9 @@ interface RecallResult {
   memories: Array<{
     content: string;
     relevanceScore: number;
+    blobId?: string;
   }>;
+  total: number;
 }
 
 interface Dependencies {
@@ -23,7 +25,7 @@ export class RecallUseCase {
     this.deps = deps;
   }
 
-  /** Recall memories relevant to a query */
+  /** Recall memories relevant to a query via MemWal semantic search */
   async execute(query: string, limit = 10): Promise<RecallResult> {
     const { memwal } = this.deps;
 
@@ -33,7 +35,9 @@ export class RecallUseCase {
       memories: result.results.map((r) => ({
         content: r.content,
         relevanceScore: r.score,
+        blobId: r.blobId,
       })),
+      total: result.total,
     };
   }
 }

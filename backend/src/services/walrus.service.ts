@@ -23,7 +23,7 @@ export class WalrusService {
   /** Store a blob on Walrus and return the blob ID */
   async store(content: string | Buffer): Promise<StoreResponse> {
     const body =
-      typeof content === "string" ? Buffer.from(content, "utf-8") : content;
+      typeof content === "string" ? new TextEncoder().encode(content) : new Uint8Array(content);
 
     const response = await fetch(
       `${this.publisherUrl}/v1/blobs?epochs=${WALRUS_STORAGE_EPOCHS}`,

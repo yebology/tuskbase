@@ -54,7 +54,12 @@ export class ProvenanceService {
     content: string,
     snapshotBlobId: string
   ): ProvenanceMetadata {
-    const domain = new URL(sourceUrl).hostname;
+    let domain: string;
+    try {
+      domain = new URL(sourceUrl).hostname;
+    } catch {
+      domain = "unknown";
+    }
     return {
       sourceUrl,
       sourceDomain: domain,

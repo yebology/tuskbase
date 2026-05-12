@@ -48,7 +48,10 @@ export class VerifyUseCase {
     }
 
     // 3. Verify on-chain transaction record
-    const onChainRecordExists = await tatum.verifyTransaction(txDigest);
+    let onChainRecordExists = false;
+    if (txDigest && !txDigest.startsWith("no_kb") && !txDigest.startsWith("on_chain")) {
+      onChainRecordExists = await tatum.verifyTransaction(txDigest);
+    }
 
     // 4. Check snapshot blob exists
     const snapshotExists = await walrus.exists(snapshotBlobId);

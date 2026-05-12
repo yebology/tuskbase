@@ -32,11 +32,20 @@ export class SearchService {
     }
 
     const data = await response.json();
-    return (data.results ?? []).map((r: Record<string, string>) => ({
-      title: r.title,
-      url: r.url,
-      content: r.content,
-      domain: new URL(r.url).hostname,
-    }));
+    return (data.results ?? [])
+      .filter((r: Record<string, string>) => {
+        try {
+          new URL(r.url);
+          return true;
+        } catch {
+          return false; // Skip results with malformed URLs
+        }
+      })
+      .map((r: Record<string, string>) => ({
+        title: r.title,
+        url: r.url,
+        content: r.content,
+        domain: new URL(r.url).hostname,
+      }));
   }
 }

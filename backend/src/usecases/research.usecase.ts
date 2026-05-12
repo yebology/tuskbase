@@ -30,23 +30,23 @@ export class ResearchUseCase {
   }
 
   /** Execute a full research flow for a given query */
-  async execute(query: string): Promise<ResearchResult> {
-    const { search, ai, walrus, memwal, provenance } = this.deps;
+  async execute(query: string, knowledgeBaseId?: string): Promise<ResearchResult> {
+    const { search, ai, walrus, memwal, provenance, tatum } = this.deps;
 
     // 1. Search the web for relevant sources
     const searchResults = await search.search(query);
 
-    // 2. Extract facts from each source
+    // 2. Extract facts from each source and store with provenance
     const memories: StoredMemory[] = [];
 
     for (const result of searchResults) {
       // 2a. Extract key facts via AI
       const facts = await ai.extractFacts(result.content, result.url);
 
-      for (const fact of facts) {
-        // 3. Store source snapshot on Walrus
-        const snapshot = await walrus.store(result.content);
+      // 3. Store source snapshot on Walrus (once per source, not per fact)
+      const snapshot = await walrus.store(result.content);
 
+      for (const fact of facts) {
         // 4. Build provenance metadata
         const meta = provenance.buildMetadata(
           result.url,
@@ -57,12 +57,33 @@ export class ResearchUseCase {
         // 5. Store the fact content on Walrus
         const blob = await walrus.store(fact);
 
-        // 6. Save to MemWal for semantic recall
-        await memwal.remember(fact);
+        // 6. Save to MemWal for semantic recall (using SDK)
+        const memwalResult = await memwal.remember(fact);
 
-        // 7. Record on-chain via Tatum (will call smart contract)
-        // TODO: Call tuskbase::memory::store via Tatum RPC
-        const txDigest = "pending_implementation";
+        // 7. Record on-chain via Tatum RPC Gateway
+        let txDigest = "no_kb_specified";
+
+        if (knowledgeBaseId) {
+          try {
+            const txResult = await tatum.storeMemoryOnChain({
+              knowledgeBaseId,
+              blobId: blob.blobId,
+              snapshotBlobId: meta.snapshotBlobId,
+              sourceUrl: meta.sourceUrl,
+              sourceDomain: meta.sourceDomain,
+              contentHash: meta.contentHash,
+              trustScore: meta.trustScore,
+            });
+            txDigest = txResult.digest;
+          } catch (error) {
+            // On-chain recording is non-blocking — log and continue
+            console.error(
+              `[Research] On-chain recording failed for fact: ${fact.slice(0, 50)}...`,
+              error instanceof Error ? error.message : error
+            );
+            txDigest = "on_chain_failed";
+          }
+        }
 
         memories.push({
           id: `mem_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
@@ -75,13 +96,16 @@ export class ResearchUseCase {
           txDigest,
           trustScore: meta.trustScore,
           timestamp: meta.timestamp,
+          memwalBlobId: memwalResult.blobId,
         });
       }
     }
 
     // 8. Generate summary from all facts
     const allFacts = memories.map((m) => m.content);
-    const summary = await ai.summarize(allFacts, query);
+    const summary = allFacts.length > 0
+      ? await ai.summarize(allFacts, query)
+      : "No relevant facts found for this query.";
 
     return { memories, summary };
   }

@@ -15,7 +15,7 @@
     "@mysten/sui": "latest",
     "openai": "^4.70.0",
     "hono": "^4.6.0",
-    "tavily": "^0.0.3",
+    "tavily": "^2.0.0",
     "dotenv": "^16.4.0",
     "zod": "^3.23.0"
   },

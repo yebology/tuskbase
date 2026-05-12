@@ -9,7 +9,12 @@ export function createHealthRoute(memwal: MemwalService) {
   const route = new Hono();
 
   route.get("/", async (c) => {
-    const memwalHealthy = await memwal.health();
+    let memwalHealthy = false;
+    try {
+      memwalHealthy = await memwal.health();
+    } catch {
+      memwalHealthy = false;
+    }
 
     return c.json({
       status: "ok",

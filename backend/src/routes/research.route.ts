@@ -23,7 +23,10 @@ export function createResearchRoute(researchUseCase: ResearchUseCase) {
     }
 
     try {
-      const result = await researchUseCase.execute(parsed.data.query);
+      const result = await researchUseCase.execute(
+        parsed.data.query,
+        parsed.data.knowledgeBaseId
+      );
       return c.json({
         success: true,
         data: result,

@@ -37,6 +37,7 @@ const envSchema = z.object({
   // Sui
   SUI_NETWORK: z.enum(["mainnet", "testnet", "devnet"]).default("mainnet"),
   TUSKBASE_PACKAGE_ID: z.string().default("0x0"),
+  SUI_PRIVATE_KEY: z.string().default("0x0"),
 });
 
 export type Env = z.infer<typeof envSchema>;

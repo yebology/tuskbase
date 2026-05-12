@@ -1,0 +1,29 @@
+# Tuskbase — Docker Compose (Backend + Frontend)
+# Usage: docker compose up -d
+
+services:
+  # --- Backend (Node.js + Hono) ---
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: tuskbase-backend
+    restart: unless-stopped
+    ports:
+      - "8000:8000"
+    env_file:
+      - ./backend/.env
+
+  # --- Frontend (Next.js) ---
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8000
+    container_name: tuskbase-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend

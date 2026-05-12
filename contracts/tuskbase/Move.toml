@@ -1,0 +1,10 @@
+[package]
+name = "tuskbase"
+edition = "2024"
+authors = ["Tuskbase Team"]
+license = "MIT"
+
+[dependencies]
+
+[addresses]
+tuskbase = "0x0"

@@ -1,0 +1,27 @@
+{
+  "name": "tuskbase-backend",
+  "version": "0.1.0",
+  "description": "Tuskbase backend — AI research agent with verifiable memory on Walrus",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "lint": "eslint src/"
+  },
+  "dependencies": {
+    "@mysten-incubation/memwal": "latest",
+    "@mysten/sui": "latest",
+    "openai": "^4.70.0",
+    "hono": "^4.6.0",
+    "tavily": "^0.0.3",
+    "dotenv": "^16.4.0",
+    "zod": "^3.23.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsx": "^4.19.0",
+    "typescript": "^5.6.0"
+  }
+}

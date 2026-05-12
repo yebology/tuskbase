@@ -16,16 +16,28 @@ export function getTrustLabel(score: number): TrustLabel {
 }
 
 /**
- * Formats an ISO timestamp into a human-readable string.
+ * Formats an ISO timestamp into a short human-readable string.
  * @param iso - ISO 8601 date string
  */
 export function formatTimestamp(iso: string): string {
-  return new Date(iso).toLocaleString("en-US", {
+  const date = new Date(iso);
+  const now = new Date();
+  const diffMs = now.getTime() - date.getTime();
+  const diffMins = Math.floor(diffMs / 60000);
+  const diffHours = Math.floor(diffMins / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  // Relative time for recent
+  if (diffMins < 1) return "just now";
+  if (diffMins < 60) return `${diffMins}m ago`;
+  if (diffHours < 24) return `${diffHours}h ago`;
+  if (diffDays < 7) return `${diffDays}d ago`;
+
+  // Absolute for older
+  return date.toLocaleDateString("en-US", {
     month: "short",
     day: "numeric",
-    year: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
+    year: date.getFullYear() !== now.getFullYear() ? "numeric" : undefined,
   });
 }
 

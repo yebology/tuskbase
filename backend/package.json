@@ -11,12 +11,13 @@
     "lint": "eslint src/"
   },
   "dependencies": {
+    "@hono/node-server": "^2.0.2",
     "@mysten-incubation/memwal": "latest",
     "@mysten/sui": "latest",
-    "openai": "^4.70.0",
-    "hono": "^4.6.0",
-    "tavily": "^2.0.0",
     "dotenv": "^16.4.0",
+    "hono": "^4.6.0",
+    "openai": "^4.70.0",
+    "tavily": "^2.0.0",
     "zod": "^3.23.0"
   },
   "devDependencies": {

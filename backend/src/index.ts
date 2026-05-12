@@ -3,6 +3,7 @@
  * Wires DI container, registers routes, and starts the server.
  */
 
+import { serve } from "@hono/node-server";
 import { Hono } from "hono";
 import { cors } from "hono/cors";
 import { logger } from "hono/logger";
@@ -47,8 +48,6 @@ app.get("/", (c) =>
 );
 
 // Start server
-console.log(`🦭 Tuskbase backend starting on port ${env.PORT}`);
-export default {
-  port: env.PORT,
-  fetch: app.fetch,
-};
+serve({ fetch: app.fetch, port: env.PORT }, (info) => {
+  console.log(`🦭 Tuskbase backend running on http://localhost:${info.port}`);
+});

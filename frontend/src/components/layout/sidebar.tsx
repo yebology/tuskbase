@@ -7,8 +7,6 @@ import { cn } from "@/lib/utils";
 import {
   MessageSquare,
   Brain,
-  Shield,
-  BookOpen,
   Menu,
   X,
 } from "lucide-react";
@@ -19,8 +17,6 @@ import { APP_NAME, APP_DESCRIPTION } from "@/constants";
 const NAV_ITEMS = [
   { href: "/", label: "Research", icon: MessageSquare },
   { href: "/memories", label: "Memories", icon: Brain },
-  { href: "/knowledge", label: "Knowledge Bases", icon: BookOpen },
-  { href: "/verify", label: "Verify", icon: Shield },
 ];
 
 export function Sidebar() {
@@ -61,34 +57,31 @@ export function Sidebar() {
       {/* Sidebar panel */}
       <aside
         className={cn(
-          "w-64 border-r border-border flex flex-col bg-sidebar h-screen overflow-y-auto shrink-0",
-          // Desktop: always visible
+          "w-56 border-r border-border flex flex-col bg-sidebar h-screen shrink-0",
           "hidden lg:flex",
-          // Mobile: slide in/out
           mobileOpen &&
             "!flex fixed inset-y-0 left-0 z-50 shadow-2xl animate-in slide-in-from-left duration-200"
         )}
       >
         {/* Logo */}
-        <div className="p-5 border-b border-border flex items-center justify-between">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <Link
             href="/"
-            className="flex items-center gap-3"
+            className="flex items-center gap-2.5"
             onClick={() => setMobileOpen(false)}
           >
-            <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
-              <Brain className="w-5 h-5 text-primary-foreground" />
+            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-sm">
+              <Brain className="w-4 h-4 text-primary-foreground" />
             </div>
             <div>
               <h1 className="font-semibold text-sm tracking-tight">
                 {APP_NAME}
               </h1>
-              <p className="text-[11px] text-muted-foreground">
+              <p className="text-[10px] text-muted-foreground">
                 {APP_DESCRIPTION}
               </p>
             </div>
           </Link>
-          {/* Close button on mobile */}
           <Button
             variant="ghost"
             size="icon-sm"
@@ -127,7 +120,7 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="min-h-[60px] px-4 flex items-center border-t border-border">
+        <div className="min-h-[52px] px-4 flex items-center border-t border-border">
           <div className="flex items-center justify-between w-full">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />

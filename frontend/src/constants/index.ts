@@ -43,6 +43,4 @@ export const UI = {
 export const NAV_ITEMS = [
   { href: "/", label: "Research", icon: "MessageSquare" },
   { href: "/memories", label: "Memories", icon: "Brain" },
-  { href: "/knowledge", label: "Knowledge Bases", icon: "BookOpen" },
-  { href: "/verify", label: "Verify", icon: "Shield" },
 ] as const;

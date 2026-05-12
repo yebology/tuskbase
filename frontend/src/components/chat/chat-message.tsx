@@ -1,13 +1,14 @@
+import Markdown from "react-markdown";
 import { ExternalLink } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { getTrustLabel, formatTimestamp } from "@/lib/formatters";
+import { getTrustLabel } from "@/lib/formatters";
 import type { ChatMessage as ChatMessageType } from "@/types";
 
 interface ChatMessageProps {
   message: ChatMessageType;
 }
 
-/** Single chat message bubble with optional memory references */
+/** Single chat message bubble with markdown rendering and memory references */
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user";
 
@@ -18,15 +19,17 @@ export function ChatMessage({ message }: ChatMessageProps) {
           isUser ? "bg-primary text-primary-foreground" : "bg-muted"
         }`}
       >
-        <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        {isUser ? (
+          <p className="text-sm whitespace-pre-wrap">{message.content}</p>
+        ) : (
+          <div className="text-sm prose prose-sm dark:prose-invert prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-li:my-0.5 max-w-none">
+            <Markdown>{message.content}</Markdown>
+          </div>
+        )}
 
         {message.memories && message.memories.length > 0 && (
           <MemoryReferences memories={message.memories} />
         )}
-
-        <p className="text-[10px] opacity-50 mt-2">
-          {formatTimestamp(message.timestamp)}
-        </p>
       </div>
     </div>
   );
@@ -52,9 +55,16 @@ function MemoryReferences({
             <span className={trust.color}>●</span>
             <span className="truncate flex-1">{mem.sourceDomain}</span>
             <Badge variant="secondary" className="text-[10px]">
-              Trust: {mem.trustScore}/10
+              {mem.trustScore}/10
             </Badge>
-            <ExternalLink className="w-3 h-3 opacity-50" />
+            <a
+              href={mem.sourceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="opacity-50 hover:opacity-100"
+            >
+              <ExternalLink className="w-3 h-3" />
+            </a>
           </div>
         );
       })}

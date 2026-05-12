@@ -1,4 +1,4 @@
-/** Core domain types for WalrusKnow */
+/** Core domain types for Tuskbase */
 
 export interface Memory {
   id: string;
@@ -11,18 +11,16 @@ export interface Memory {
   contentHash: string;
   txDigest: string;
   trustScore: number;
-  namespace: string;
+  /** Session ID — groups memories by research query */
+  sessionId: string;
 }
 
-export interface KnowledgeBase {
+/** A research session — one user query = one session */
+export interface ResearchSession {
   id: string;
-  name: string;
-  description: string;
-  owner: string;
-  createdAt: string;
+  query: string;
+  timestamp: string;
   memoryCount: number;
-  isPublic: boolean;
-  totalTrustScore: number;
 }
 
 export interface ChatMessage {
@@ -31,6 +29,8 @@ export interface ChatMessage {
   content: string;
   memories?: Memory[];
   timestamp: string;
+  /** Links chat message to a research session */
+  sessionId?: string;
 }
 
 export interface TrustLabel {

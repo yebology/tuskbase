@@ -18,6 +18,7 @@ import {
   truncateHash,
   getSuiExplorerTxUrl,
 } from "@/lib/formatters";
+import { verifyMemory, USE_MOCK_DATA } from "@/services/api";
 import { UI } from "@/constants";
 import type { Memory } from "@/types";
 
@@ -36,13 +37,26 @@ export function MemoryDetail({ memory }: MemoryDetailProps) {
     setIsVerifying(true);
     setIsVerified(null);
 
-    // Simulated verification — will call /api/memory/verify in production
-    const timer = setTimeout(() => {
-      setIsVerified(true);
-      setIsVerifying(false);
-    }, UI.SIMULATED_VERIFY_DELAY_MS);
-
-    return () => clearTimeout(timer);
+    if (USE_MOCK_DATA) {
+      // Simulated verification
+      const timer = setTimeout(() => {
+        setIsVerified(true);
+        setIsVerifying(false);
+      }, UI.SIMULATED_VERIFY_DELAY_MS);
+      return () => clearTimeout(timer);
+    } else {
+      // Real API verification
+      verifyMemory(memory)
+        .then((result) => {
+          setIsVerified(result.isValid);
+        })
+        .catch(() => {
+          setIsVerified(false);
+        })
+        .finally(() => {
+          setIsVerifying(false);
+        });
+    }
   }, [memory.id]);
 
   return (

@@ -7,7 +7,7 @@
 import type { Memory, VerificationResult } from "@/types";
 
 /** Toggle this to switch between mock data and real API */
-export const USE_MOCK_DATA = true;
+export const USE_MOCK_DATA = false;
 
 /** Base URL for the backend API */
 const API_BASE_URL =

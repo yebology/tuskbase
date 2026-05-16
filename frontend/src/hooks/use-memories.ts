@@ -49,7 +49,7 @@ export function useMemories() {
   const selectSession = useCallback(
     (id: string | null) => {
       setSelectedSessionId(id);
-      setSelectedId(null); // Deselect memory when switching session
+      setSelectedId(null);
     },
     []
   );

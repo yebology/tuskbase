@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+/// A research session — one user query = one chat thread
+model Session {
+  id        String   @id @default(cuid())
+  query     String
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  messages Message[]
+  memories Memory[]
+
+  @@map("sessions")
+}
+
+/// A chat message within a session
+model Message {
+  id        String   @id @default(cuid())
+  role      String   // "user" | "assistant"
+  content   String
+  createdAt DateTime @default(now()) @map("created_at")
+
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String  @map("session_id")
+
+  @@map("messages")
+}
+
+/// A stored memory with provenance — cached from Walrus/Sui
+model Memory {
+  id             String   @id @default(cuid())
+  content        String
+  sourceUrl      String   @map("source_url")
+  sourceDomain   String   @map("source_domain")
+  blobId         String   @map("blob_id")
+  snapshotBlobId String   @map("snapshot_blob_id")
+  contentHash    String   @map("content_hash")
+  txDigest       String   @map("tx_digest")
+  trustScore     Int      @map("trust_score")
+  memwalBlobId   String?  @map("memwal_blob_id")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  session   Session @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  sessionId String  @map("session_id")
+
+  @@map("memories")
+}

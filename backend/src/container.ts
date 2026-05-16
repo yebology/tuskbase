@@ -8,7 +8,9 @@ import { AIService } from "./services/ai.service.js";
 import { WalrusService } from "./services/walrus.service.js";
 import { MemwalService } from "./services/memwal.service.js";
 import { TatumService } from "./services/tatum.service.js";
+import { TatumMcpService } from "./services/tatum-mcp.service.js";
 import { ProvenanceService } from "./services/provenance.service.js";
+import { DatabaseService } from "./services/database.service.js";
 import { ResearchUseCase } from "./usecases/research.usecase.js";
 import { VerifyUseCase } from "./usecases/verify.usecase.js";
 import { RecallUseCase } from "./usecases/recall.usecase.js";
@@ -20,7 +22,9 @@ export interface Container {
   walrus: WalrusService;
   memwal: MemwalService;
   tatum: TatumService;
+  tatumMcp: TatumMcpService;
   provenance: ProvenanceService;
+  db: DatabaseService;
 
   // Use cases
   researchUseCase: ResearchUseCase;
@@ -36,7 +40,9 @@ export function createContainer(): Container {
   const walrus = new WalrusService();
   const memwal = new MemwalService();
   const tatum = new TatumService();
+  const tatumMcp = new TatumMcpService();
   const provenance = new ProvenanceService();
+  const db = new DatabaseService();
 
   // Use cases (depend on services)
   const researchUseCase = new ResearchUseCase({
@@ -52,6 +58,7 @@ export function createContainer(): Container {
     walrus,
     provenance,
     tatum,
+    tatumMcp,
   });
 
   const recallUseCase = new RecallUseCase({
@@ -64,7 +71,9 @@ export function createContainer(): Container {
     walrus,
     memwal,
     tatum,
+    tatumMcp,
     provenance,
+    db,
     researchUseCase,
     verifyUseCase,
     recallUseCase,

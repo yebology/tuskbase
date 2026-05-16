@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { ChatMessage, Memory } from "@/types";
 import { MOCK_CHAT_MESSAGES, MOCK_MEMORIES, MOCK_SESSIONS } from "@/services/mock-data";
 import { research, mapApiMemoryToMemory, USE_MOCK_DATA } from "@/services/api";
@@ -16,21 +16,42 @@ interface ChatSession {
 
 /**
  * Hook for managing chat sessions — multiple research threads.
+ * Sessions persisted in localStorage so they survive page refresh.
  * Calls real backend API when USE_MOCK_DATA is false.
  */
 export function useChat() {
-  const [sessions, setSessions] = useState<ChatSession[]>([
-    {
-      id: "session_001",
-      query: "Research DeFi protocols on Sui blockchain",
-      messages: MOCK_CHAT_MESSAGES,
-      memories: MOCK_MEMORIES.filter((m) => m.sessionId === "session_001"),
-      timestamp: "2026-05-25T10:29:00Z",
-    },
-  ]);
-  const [activeSessionId, setActiveSessionId] = useState<string>("session_001");
+  const [sessions, setSessions] = useState<ChatSession[]>(() => {
+    if (typeof window === "undefined") return [];
+    const saved = localStorage.getItem("tuskbase_sessions");
+    if (saved) {
+      try { return JSON.parse(saved); } catch { /* ignore */ }
+    }
+    return [
+      {
+        id: "session_001",
+        query: "Research DeFi protocols on Sui blockchain",
+        messages: MOCK_CHAT_MESSAGES,
+        memories: MOCK_MEMORIES.filter((m) => m.sessionId === "session_001"),
+        timestamp: "2026-05-25T10:29:00Z",
+      },
+    ];
+  });
+  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
+    if (typeof window === "undefined") return "session_001";
+    const saved = localStorage.getItem("tuskbase_active_session");
+    return saved ?? "session_001";
+  });
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  // Persist sessions to localStorage on change
+  useEffect(() => {
+    localStorage.setItem("tuskbase_sessions", JSON.stringify(sessions));
+  }, [sessions]);
+
+  useEffect(() => {
+    localStorage.setItem("tuskbase_active_session", activeSessionId);
+  }, [activeSessionId]);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId);
   const messages = activeSession?.messages ?? [];

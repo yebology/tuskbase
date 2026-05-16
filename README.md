@@ -27,6 +27,21 @@ AI agents today have two problems: they forget everything between sessions, and 
 
 ---
 
+## 🤖 AI Agent with Blockchain Tools (Tatum MCP)
+
+The agent automatically detects user intent and routes to the right tool:
+
+| User asks... | Agent uses... |
+|---|---|
+| "Research DeFi on Sui" | Tavily (web search) → Walrus → MemWal → Sui |
+| "What's the SUI price?" | Tatum MCP Data API (exchange rate) |
+| "Show portfolio of 0xabc..." | Tatum MCP Data API (wallet portfolio) |
+| "Is 0xabc... safe?" | Tatum MCP Data API (security check) |
+
+This is powered by `@tatumio/blockchain-mcp` — the AI agent uses Tatum's blockchain tools to answer on-chain queries directly.
+
+---
+
 ## 🎯 Key Features
 
 ### 🔍 AI Research Agent
@@ -114,13 +129,15 @@ AI agents today have two problems: they forget everything between sessions, and 
 | Layer | Technology |
 |-------|-----------|
 | Frontend | Next.js 16, Tailwind CSS v4, shadcn/ui, TypeScript |
-| Backend | Hono, TypeScript, Zod validation |
-| AI | OpenAI GPT-4o-mini |
+| Backend | Hono, TypeScript, Prisma, PostgreSQL, Zod validation |
+| AI | OpenAI GPT-4o-mini (intent routing + summarization) |
 | Memory | MemWal SDK (`@mysten-incubation/memwal`) |
 | Storage | Walrus HTTP API (publisher/aggregator) |
 | Blockchain | Sui (Move smart contracts) |
 | RPC | Tatum Sui RPC Gateway |
+| Data API | Tatum MCP (`@tatumio/blockchain-mcp`) |
 | Search | Tavily API |
+| Wallet | @mysten/dapp-kit-react |
 
 ---
 
@@ -228,6 +245,7 @@ sui client publish --gas-budget 100000000
 | Variable | Description |
 |----------|------------|
 | `PORT` | Backend server port (default: 8000) |
+| `DATABASE_URL` | PostgreSQL connection string |
 | `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini |
 | `MEMWAL_PRIVATE_KEY` | Ed25519 private key for MemWal |
 | `MEMWAL_ACCOUNT_ID` | MemWal account ID |
@@ -238,6 +256,23 @@ sui client publish --gas-budget 100000000
 | `TATUM_SUI_RPC` | Tatum Sui RPC gateway URL |
 | `TAVILY_API_KEY` | Tavily API key for web search |
 | `TUSKBASE_PACKAGE_ID` | Deployed smart contract package ID |
+| `SUI_PRIVATE_KEY` | Sui Ed25519 private key for signing transactions |
+
+---
+
+## 🗄️ Database
+
+Tuskbase uses PostgreSQL (via Prisma) to persist:
+- Research sessions and chat history
+- Memory cache (for fast access without re-fetching from Walrus)
+
+```bash
+# Start Postgres
+docker compose up postgres -d
+
+# Run migrations
+cd backend && npx prisma migrate dev --name init
+```
 
 ---
 

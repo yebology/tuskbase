@@ -47,4 +47,6 @@ export interface VerificationResult {
   hashMatches: boolean;
   onChainRecordExists: boolean;
   snapshotExists: boolean;
+  /** Current SUI price in USD (from Tatum MCP Data API) */
+  suiPriceUsd: number | null;
 }

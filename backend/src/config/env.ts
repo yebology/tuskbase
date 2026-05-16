@@ -5,6 +5,9 @@ import "dotenv/config";
 const envSchema = z.object({
   PORT: z.coerce.number().default(8000),
 
+  // Database
+  DATABASE_URL: z.string().url().default("postgresql://postgres:postgres@localhost:5432/tuskbase"),
+
   // OpenAI
   OPENAI_API_KEY: z.string().min(1),
 

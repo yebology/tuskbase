@@ -32,7 +32,11 @@ app.use(
 
 // Routes
 app.route("/api/health", createHealthRoute(container.memwal));
-app.route("/api/research", createResearchRoute(container.researchUseCase));
+app.route("/api/research", createResearchRoute(
+  container.researchUseCase,
+  container.ai,
+  container.tatumMcp
+));
 app.route(
   "/api/memory",
   createMemoryRoute(container.recallUseCase, container.verifyUseCase)

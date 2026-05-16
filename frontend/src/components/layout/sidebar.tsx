@@ -11,6 +11,7 @@ import {
   X,
 } from "lucide-react";
 import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { ConnectWallet } from "@/components/layout/connect-wallet";
 import { Button } from "@/components/ui/button";
 import { APP_NAME, APP_DESCRIPTION } from "@/constants";
 
@@ -120,11 +121,12 @@ export function Sidebar() {
         </nav>
 
         {/* Footer */}
-        <div className="min-h-[52px] px-4 flex items-center border-t border-border">
-          <div className="flex items-center justify-between w-full">
+        <div className="px-4 py-3 border-t border-border space-y-3">
+          <ConnectWallet />
+          <div className="flex items-center justify-between">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-              <span>Sui Mainnet</span>
+              <span>Sui Devnet</span>
             </div>
             <ThemeToggle />
           </div>

@@ -29,13 +29,13 @@ const envSchema = z.object({
   TATUM_SUI_RPC: z
     .string()
     .url()
-    .default("https://sui-mainnet.gateway.tatum.io"),
+    .default("https://sui-devnet.gateway.tatum.io"),
 
   // Tavily
   TAVILY_API_KEY: z.string().min(1),
 
   // Sui
-  SUI_NETWORK: z.enum(["mainnet", "testnet", "devnet"]).default("mainnet"),
+  SUI_NETWORK: z.enum(["mainnet", "testnet", "devnet"]).default("devnet"),
   TUSKBASE_PACKAGE_ID: z.string().default("0x0"),
   SUI_PRIVATE_KEY: z.string().default("0x0"),
 });

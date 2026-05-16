@@ -1,5 +1,5 @@
 import Markdown from "react-markdown";
-import { ExternalLink } from "lucide-react";
+import { ExternalLink, User, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getTrustLabel } from "@/lib/formatters";
 import type { ChatMessage as ChatMessageType } from "@/types";
@@ -8,21 +8,30 @@ interface ChatMessageProps {
   message: ChatMessageType;
 }
 
-/** Single chat message bubble with markdown rendering and memory references */
+/** Single chat message with avatar, markdown rendering, and memory references */
 export function ChatMessage({ message }: ChatMessageProps) {
   const isUser = message.role === "user";
 
   return (
-    <div className={`flex ${isUser ? "justify-end" : "justify-start"}`}>
+    <div className={`flex gap-3 ${isUser ? "justify-end" : "justify-start"}`}>
+      {/* Avatar — assistant only */}
+      {!isUser && (
+        <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shrink-0 mt-0.5">
+          <Brain className="w-3.5 h-3.5 text-primary-foreground" />
+        </div>
+      )}
+
       <div
-        className={`max-w-[85%] rounded-xl px-4 py-3 ${
-          isUser ? "bg-primary text-primary-foreground" : "bg-muted"
+        className={`max-w-[80%] rounded-2xl px-4 py-3 ${
+          isUser
+            ? "bg-primary text-primary-foreground rounded-br-md"
+            : "bg-muted rounded-bl-md"
         }`}
       >
         {isUser ? (
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <div className="text-sm prose prose-sm dark:prose-invert prose-p:my-1.5 prose-headings:my-2 prose-ul:my-1.5 prose-li:my-0.5 max-w-none">
+          <div className="text-sm prose prose-sm dark:prose-invert prose-p:my-1.5 prose-headings:my-2 prose-headings:text-sm prose-ul:my-1.5 prose-li:my-0.5 max-w-none">
             <Markdown>{message.content}</Markdown>
           </div>
         )}
@@ -31,6 +40,13 @@ export function ChatMessage({ message }: ChatMessageProps) {
           <MemoryReferences memories={message.memories} />
         )}
       </div>
+
+      {/* Avatar — user only */}
+      {isUser && (
+        <div className="w-7 h-7 rounded-lg bg-secondary flex items-center justify-center shrink-0 mt-0.5">
+          <User className="w-3.5 h-3.5 text-secondary-foreground" />
+        </div>
+      )}
     </div>
   );
 }
@@ -41,27 +57,29 @@ function MemoryReferences({
   memories: NonNullable<ChatMessageType["memories"]>;
 }) {
   return (
-    <div className="mt-3 pt-3 border-t border-border/50 space-y-2">
-      <p className="text-xs font-medium opacity-70">
-        📚 Sources stored on Walrus:
+    <div className="mt-3 pt-3 border-t border-border/30 space-y-1.5">
+      <p className="text-[11px] font-medium opacity-60">
+        Sources stored on Walrus:
       </p>
       {memories.map((mem) => {
         const trust = getTrustLabel(mem.trustScore);
         return (
           <div
             key={mem.id}
-            className="flex items-center gap-2 text-xs bg-background/50 rounded-md px-2 py-1.5"
+            className="flex items-center gap-2 text-xs bg-background/40 rounded-md px-2.5 py-1.5"
           >
-            <span className={trust.color}>●</span>
-            <span className="truncate flex-1">{mem.sourceDomain}</span>
-            <Badge variant="secondary" className="text-[10px]">
+            <span className={`${trust.color} text-[10px]`}>●</span>
+            <span className="truncate flex-1 opacity-80">
+              {mem.sourceDomain}
+            </span>
+            <Badge variant="secondary" className="text-[9px] px-1.5 py-0">
               {mem.trustScore}/10
             </Badge>
             <a
               href={mem.sourceUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="opacity-50 hover:opacity-100"
+              className="opacity-40 hover:opacity-100 transition-opacity"
             >
               <ExternalLink className="w-3 h-3" />
             </a>

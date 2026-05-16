@@ -23,7 +23,7 @@ export const TRUST_LABELS = {
 
 /** Network configuration */
 export const NETWORK = {
-  SUI_EXPLORER_BASE: "https://suiscan.xyz/mainnet",
+  SUI_EXPLORER_BASE: "https://suiscan.xyz/devnet",
   WALRUS_AGGREGATOR: "https://aggregator.walrus.site",
   WALRUS_PUBLISHER: "https://publisher.walrus.site",
   TATUM_SUI_RPC: "https://sui-mainnet.gateway.tatum.io",

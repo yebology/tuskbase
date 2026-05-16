@@ -3,6 +3,7 @@ import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/layout/theme-provider";
 import { Sidebar } from "@/components/layout/sidebar";
+import { AppProviders } from "@/components/layout/app-providers";
 import "./globals.css";
 
 const inter = Inter({
@@ -34,12 +35,14 @@ export default function RootLayout({
     >
       <body className="h-screen flex font-sans bg-background text-foreground overflow-hidden">
         <ThemeProvider>
-          <TooltipProvider>
-            <Sidebar />
-            <main className="flex-1 flex flex-col h-screen overflow-hidden pt-14 lg:pt-0">
-              {children}
-            </main>
-          </TooltipProvider>
+          <AppProviders>
+            <TooltipProvider>
+              <Sidebar />
+              <main className="flex-1 flex flex-col h-screen overflow-hidden pt-14 lg:pt-0">
+                {children}
+              </main>
+            </TooltipProvider>
+          </AppProviders>
         </ThemeProvider>
       </body>
     </html>

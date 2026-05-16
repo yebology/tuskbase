@@ -95,14 +95,14 @@ function VerificationStatus({
 
 function ContentCard({ content }: { content: string }) {
   return (
-    <Card className="mb-4">
+    <Card className="mb-4 border-primary/20 bg-primary/[0.02]">
       <CardHeader className="pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           Content
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <p className="text-sm">{content}</p>
+        <p className="text-sm leading-relaxed">{content}</p>
       </CardContent>
     </Card>
   );

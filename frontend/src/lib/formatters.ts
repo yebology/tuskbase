@@ -64,7 +64,7 @@ export function truncateAddress(address: string): string {
  * @param txDigest - Transaction digest
  */
 export function getSuiExplorerTxUrl(txDigest: string): string {
-  return `https://suiscan.xyz/mainnet/tx/${txDigest}`;
+  return `https://suiscan.xyz/devnet/tx/${txDigest}`;
 }
 
 /**

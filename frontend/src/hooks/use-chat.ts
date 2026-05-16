@@ -99,13 +99,43 @@ export function useChat() {
     }, UI.SIMULATED_RESPONSE_DELAY_MS);
   }, [input, isLoading, activeSessionId]);
 
+  /** Rename a session */
+  const renameSession = useCallback((sessionId: string, newQuery: string) => {
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === sessionId ? { ...s, query: newQuery } : s
+      )
+    );
+  }, []);
+
+  /** Delete a session */
+  const deleteSession = useCallback((sessionId: string) => {
+    setSessions((prev) => {
+      const filtered = prev.filter((s) => s.id !== sessionId);
+      if (filtered.length === 0) {
+        const newSession: ChatSession = {
+          id: `session_${Date.now()}`,
+          query: "New Research",
+          messages: [],
+          timestamp: new Date().toISOString(),
+        };
+        setActiveSessionId(newSession.id);
+        return [newSession];
+      }
+      if (sessionId === activeSessionId) {
+        setActiveSessionId(filtered[0].id);
+      }
+      return filtered;
+    });
+  }, [activeSessionId]);
+
   return {
-    // Session management
     sessions,
     activeSessionId,
     createSession,
     switchSession,
-    // Chat state
+    renameSession,
+    deleteSession,
     messages,
     input,
     setInput,

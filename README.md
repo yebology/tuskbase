@@ -4,7 +4,7 @@
 
 ## 🎬 Demo Video
 
-[![Tuskbase Demo](https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://youtu.be/TODO)
+[![Tuskbase Demo](https://img.shields.io/badge/Watch%20Demo-YouTube-red?style=for-the-badge&logo=youtube)](https://www.youtube.com/watch?v=pxf4NT5lXrk)
 
 ---
 

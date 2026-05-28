@@ -36,12 +36,16 @@ export function createResearchRoute(
 
     try {
       // 1. Detect intent — is this web research or blockchain query?
+      console.log(`[Route] Research query: "${query}"`);
       const intent = await ai.detectIntent(query);
+      console.log(`[Route] Intent: ${intent.type}`);
 
       // 2. Route based on intent
       if (intent.type === "web_research") {
         // Standard web research flow
         const result = await researchUseCase.execute(query, knowledgeBaseId);
+        console.log(`[Route] Research done: ${result.memories.length} memories`);
+        console.log(`[Route] Summary:\n${result.summary}`);
         return c.json({ success: true, data: result });
       }
 
@@ -49,36 +53,49 @@ export function createResearchRoute(
       let blockchainData: unknown;
       let context: string;
 
-      switch (intent.type) {
-        case "blockchain_price":
-          blockchainData = (await tatumMcp.getExchangeRate()).data;
-          context = "SUI token exchange rate";
-          break;
+      try {
+        switch (intent.type) {
+          case "blockchain_price":
+            blockchainData = (await tatumMcp.getExchangeRate()).data;
+            context = "SUI token exchange rate";
+            break;
 
-        case "blockchain_portfolio":
-          blockchainData = (
-            await tatumMcp.getWalletPortfolio(intent.address)
-          ).data;
-          context = `Wallet portfolio for ${intent.address}`;
-          break;
+          case "blockchain_portfolio":
+            blockchainData = (
+              await tatumMcp.getWalletPortfolio(intent.address)
+            ).data;
+            context = `Wallet portfolio for ${intent.address}`;
+            break;
 
-        case "blockchain_transactions":
-          blockchainData = (
-            await tatumMcp.getTransactionHistory(intent.address)
-          ).data;
-          context = `Transaction history for ${intent.address}`;
-          break;
+          case "blockchain_transactions":
+            blockchainData = (
+              await tatumMcp.getTransactionHistory(intent.address)
+            ).data;
+            context = `Transaction history for ${intent.address}`;
+            break;
 
-        case "blockchain_security":
-          blockchainData = (
-            await tatumMcp.checkMaliciousAddress(intent.address)
-          ).data;
-          context = `Security check for ${intent.address}`;
-          break;
+          case "blockchain_security":
+            blockchainData = (
+              await tatumMcp.checkMaliciousAddress(intent.address)
+            ).data;
+            context = `Security check for ${intent.address}`;
+            break;
 
-        default:
-          const result = await researchUseCase.execute(query, knowledgeBaseId);
-          return c.json({ success: true, data: result });
+          default:
+            const result = await researchUseCase.execute(query, knowledgeBaseId);
+            return c.json({ success: true, data: result });
+        }
+      } catch (error) {
+        // Tatum MCP failed — fallback to web research
+        console.error("[Route] Tatum MCP failed, falling back to web research:", error);
+        const result = await researchUseCase.execute(query, knowledgeBaseId);
+        return c.json({ success: true, data: result });
+      }
+
+      // If no data returned, fallback to web research
+      if (!blockchainData) {
+        const result = await researchUseCase.execute(query, knowledgeBaseId);
+        return c.json({ success: true, data: result });
       }
 
       // 3. Format blockchain data into readable response via AI

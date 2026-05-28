@@ -16,15 +16,20 @@ export type QueryIntent =
 
 export class AIService {
   private client: OpenAI;
+  private model: string;
 
   constructor() {
-    this.client = new OpenAI({ apiKey: env.OPENAI_API_KEY });
+    this.client = new OpenAI({
+      apiKey: env.OPENAI_API_KEY,
+      baseURL: env.OPENAI_BASE_URL,
+    });
+    this.model = env.OPENAI_MODEL;
   }
 
   /** Detect user intent — is this a web research query or a blockchain query? */
   async detectIntent(query: string): Promise<QueryIntent> {
     const response = await this.client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: this.model,
       messages: [
         {
           role: "system",
@@ -61,15 +66,23 @@ Examples:
     }
   }
 
-  /** Summarize a research source into key facts */
-  async extractFacts(content: string, sourceUrl: string): Promise<string[]> {
+  /** Summarize a research source into key facts with trust scores */
+  async extractFacts(content: string, sourceUrl: string): Promise<Array<{ fact: string; trustScore: number }>> {
     const response = await this.client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: this.model,
       messages: [
         {
           role: "system",
-          content:
-            'You are a research assistant. Extract 1-3 key factual claims from the given content. Each fact should be a single, verifiable statement. Return a JSON object with a "facts" key containing an array of strings. Example: {"facts": ["fact 1", "fact 2"]}',
+          content: `You are a research assistant. Extract 1-3 key factual claims from the given content.
+
+For each fact, also rate the source trustworthiness (1-10):
+- 10: Government, academic institutions
+- 8-9: Official protocol docs, established research platforms
+- 7: Major exchanges, reputable news, well-known platforms
+- 5-6: Blogs, medium articles, general tech sites
+- 3-4: Social media, forums, anonymous sources
+
+Return a JSON object: {"facts": [{"fact": "...", "trustScore": N}, ...]}`,
         },
         {
           role: "user",
@@ -83,7 +96,13 @@ Examples:
     const text = response.choices[0]?.message?.content ?? '{"facts":[]}';
     try {
       const parsed = JSON.parse(text);
-      return Array.isArray(parsed.facts) ? parsed.facts : [];
+      if (Array.isArray(parsed.facts)) {
+        return parsed.facts.map((f: any) => ({
+          fact: typeof f === "string" ? f : f.fact ?? "",
+          trustScore: typeof f === "string" ? 5 : Math.min(10, Math.max(1, f.trustScore ?? 5)),
+        }));
+      }
+      return [];
     } catch {
       return [];
     }
@@ -92,12 +111,27 @@ Examples:
   /** Generate a research summary from multiple findings */
   async summarize(facts: string[], query: string): Promise<string> {
     const response = await this.client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: this.model,
       messages: [
         {
           role: "system",
-          content:
-            "You are a research assistant. Summarize the findings into a clear, structured response. Use markdown formatting. Be concise but comprehensive.",
+          content: `You are a research assistant. Create a well-formatted markdown summary.
+
+FORMAT RULES (strict):
+- Start with a one-sentence overview paragraph
+- Use ## for section headings (with relevant emoji prefix, e.g. ## 🔍 Key Findings)
+- Use bullet points (- ) for lists
+- Use numbered lists (1. 2. 3.) for sequential/ranked items
+- Use **bold** for key terms
+- Use \`code\` for specific numbers, values, or technical terms (e.g. \`$1.5B\`, \`300K TPS\`)
+- Use > blockquote for important highlights or conclusions
+- Use markdown tables (| col | col |) when comparing data or listing 2+ items with multiple attributes
+- Use emoji to highlight key points (🔑 ⚡ 📊 🔗 💡 🏗️ etc.)
+- Keep paragraphs short (2-3 sentences max)
+- End with > 💡 **Key Takeaway:** followed by one sentence
+- Total length: 150-300 words
+- DO NOT use plain text without formatting
+- ALWAYS leave a blank line between headings, paragraphs, lists, tables, and blockquotes`,
         },
         {
           role: "user",
@@ -113,12 +147,21 @@ Examples:
   /** Format blockchain data into a readable response */
   async formatBlockchainResponse(data: unknown, context: string): Promise<string> {
     const response = await this.client.chat.completions.create({
-      model: "gpt-4o-mini",
+      model: this.model,
       messages: [
         {
           role: "system",
-          content:
-            "You are a helpful assistant. Format the given blockchain data into a clear, readable markdown response. Include relevant numbers, addresses (truncated), and context. Be concise.",
+          content: `You format blockchain data into visually appealing markdown responses.
+
+FORMAT RULES:
+- Use ## heading with emoji (e.g. ## 💰 SUI Price)
+- Use \`code\` for numbers and values (e.g. \`$0.91\`)
+- Use **bold** for labels
+- Use tables if multiple data points
+- Use > blockquote for key insight
+- Add relevant emoji throughout
+- Keep it concise (3-5 lines max)
+- Make it look professional and clean`,
         },
         {
           role: "user",

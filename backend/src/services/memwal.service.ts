@@ -6,7 +6,6 @@
 
 import { MemWal } from "@mysten-incubation/memwal";
 import type {
-  RememberResult,
   RecallResult as SDKRecallResult,
   AnalyzeWaitResult,
   RestoreResult,
@@ -46,12 +45,12 @@ export class MemwalService {
     });
   }
 
-  /** Store a memory and wait for confirmation */
+  /** Store a memory and return immediately (don't wait for Walrus confirmation) */
   async remember(content: string): Promise<MemwalRememberResult> {
-    const result: RememberResult = await this.client.rememberAndWait(content);
+    const job = await this.client.remember(content);
     return {
-      jobId: result.job_id ?? result.id,
-      blobId: result.blob_id,
+      jobId: job.job_id,
+      blobId: job.job_id, // Use job_id as reference until blob is ready
     };
   }
 

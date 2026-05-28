@@ -10,6 +10,8 @@ const envSchema = z.object({
 
   // OpenAI
   OPENAI_API_KEY: z.string().min(1),
+  OPENAI_BASE_URL: z.string().url().default("https://api.openai.com/v1"),
+  OPENAI_MODEL: z.string().default("gpt-4o-mini"),
 
   // MemWal
   MEMWAL_PRIVATE_KEY: z.string().min(1),
@@ -41,6 +43,7 @@ const envSchema = z.object({
   SUI_NETWORK: z.enum(["mainnet", "testnet", "devnet"]).default("devnet"),
   TUSKBASE_PACKAGE_ID: z.string().default("0x0"),
   SUI_PRIVATE_KEY: z.string().default("0x0"),
+  DEFAULT_KNOWLEDGE_BASE_ID: z.string().default(""),
 });
 
 export type Env = z.infer<typeof envSchema>;

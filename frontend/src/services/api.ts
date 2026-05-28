@@ -87,27 +87,40 @@ class ApiError extends Error {
 
 async function request<T>(
   endpoint: string,
-  options: RequestInit = {}
+  options: RequestInit = {},
+  timeoutMs = 120000
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
-  const response = await fetch(url, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options.headers,
-    },
-    ...options,
-  });
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        ...options.headers,
+      },
+      signal: controller.signal,
+      ...options,
+    });
 
-  if (!response.ok) {
-    const body = await response.json().catch(() => ({}));
-    throw new ApiError(
-      response.status,
-      body.message ?? body.error ?? `Request failed: ${response.statusText}`
-    );
+    if (!response.ok) {
+      const body = await response.json().catch(() => ({}));
+      throw new ApiError(
+        response.status,
+        body.message ?? body.error ?? `Request failed: ${response.statusText}`
+      );
+    }
+
+    return response.json();
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new ApiError(408, "Request timed out — research is taking too long");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
   }
-
-  return response.json();
 }
 
 // ============================================================

@@ -27,10 +27,10 @@ export const MEDIUM_TRUST_DOMAINS = [
 ] as const;
 
 /** Walrus storage epochs */
-export const WALRUS_STORAGE_EPOCHS = 5;
+export const WALRUS_STORAGE_EPOCHS = 10;
 
 /** Max memories to recall per query */
 export const DEFAULT_RECALL_LIMIT = 10;
 
 /** Max search results from Tavily */
-export const MAX_SEARCH_RESULTS = 5;
+export const MAX_SEARCH_RESULTS = 3;

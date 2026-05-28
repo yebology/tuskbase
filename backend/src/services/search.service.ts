@@ -24,6 +24,15 @@ export class SearchService {
         query,
         max_results: MAX_SEARCH_RESULTS,
         include_answer: false,
+        exclude_domains: [
+          "youtube.com",
+          "twitter.com",
+          "x.com",
+          "reddit.com",
+          "facebook.com",
+          "tiktok.com",
+          "instagram.com",
+        ],
       }),
     });
 

@@ -26,9 +26,11 @@ export class TatumService {
     this.rpcUrl = env.TATUM_SUI_RPC;
     this.apiKey = env.TATUM_API_KEY;
 
-    // Use Tatum RPC Gateway as the Sui client endpoint
+    // Use Sui public RPC for transaction building/execution
+    // (Tatum gateway doesn't support all methods needed by the SDK)
+    const publicRpc = `https://fullnode.${env.SUI_NETWORK}.sui.io:443`;
     this.client = new SuiJsonRpcClient({
-      url: this.rpcUrl,
+      url: publicRpc,
       network: env.SUI_NETWORK,
     });
   }
@@ -243,14 +245,9 @@ export class TatumService {
   }
 
   /** Get the current Sui network info via Tatum */
-  async getNetworkInfo(): Promise<{ epoch: string; version: string }> {
-    const result = (await this.rpc("sui_getLatestSuiSystemState", [])) as {
-      epoch: string;
-      systemStateVersion: string;
-    };
-    return {
-      epoch: result.epoch,
-      version: result.systemStateVersion,
-    };
+  async getNetworkInfo(): Promise<{ chainId: string; totalTx: string }> {
+    const chainId = (await this.rpc("sui_getChainIdentifier", [])) as string;
+    const totalTx = (await this.rpc("sui_getTotalTransactionBlocks", [])) as string;
+    return { chainId, totalTx };
   }
 }

@@ -1,25 +1,39 @@
 /**
  * Database Service — handles persistence of sessions, messages, and memories.
- * Uses Prisma with PostgreSQL for structured data storage.
+ * Uses Prisma with PostgreSQL. Gracefully degrades if DB is unavailable.
  */
 
-import { PrismaClient } from "@prisma/client";
 import type { StoredMemory } from "../types/index.js";
 
-const prisma = new PrismaClient();
+let prisma: any = null;
+
+async function getClient() {
+  if (prisma) return prisma;
+  try {
+    const { PrismaClient } = await import("@prisma/client");
+    prisma = new PrismaClient();
+    await prisma.$connect();
+    return prisma;
+  } catch (error) {
+    console.warn("[Database] PostgreSQL not available — running without persistence");
+    return null;
+  }
+}
 
 export class DatabaseService {
   /** Create a new research session */
-  async createSession(query: string): Promise<string> {
-    const session = await prisma.session.create({
-      data: { query },
-    });
+  async createSession(query: string): Promise<string | null> {
+    const client = await getClient();
+    if (!client) return null;
+    const session = await client.session.create({ data: { query } });
     return session.id;
   }
 
   /** Get all sessions (most recent first) */
   async getSessions() {
-    return prisma.session.findMany({
+    const client = await getClient();
+    if (!client) return [];
+    return client.session.findMany({
       orderBy: { createdAt: "desc" },
       include: { _count: { select: { memories: true } } },
     });
@@ -27,7 +41,9 @@ export class DatabaseService {
 
   /** Get a session with its messages and memories */
   async getSession(id: string) {
-    return prisma.session.findUnique({
+    const client = await getClient();
+    if (!client) return null;
+    return client.session.findUnique({
       where: { id },
       include: {
         messages: { orderBy: { createdAt: "asc" } },
@@ -38,27 +54,30 @@ export class DatabaseService {
 
   /** Rename a session */
   async renameSession(id: string, query: string) {
-    return prisma.session.update({
-      where: { id },
-      data: { query },
-    });
+    const client = await getClient();
+    if (!client) return null;
+    return client.session.update({ where: { id }, data: { query } });
   }
 
   /** Delete a session and all its data */
   async deleteSession(id: string) {
-    return prisma.session.delete({ where: { id } });
+    const client = await getClient();
+    if (!client) return null;
+    return client.session.delete({ where: { id } });
   }
 
   /** Add a message to a session */
   async addMessage(sessionId: string, role: string, content: string) {
-    return prisma.message.create({
-      data: { sessionId, role, content },
-    });
+    const client = await getClient();
+    if (!client) return null;
+    return client.message.create({ data: { sessionId, role, content } });
   }
 
   /** Store a memory linked to a session */
   async storeMemory(sessionId: string, memory: StoredMemory) {
-    return prisma.memory.create({
+    const client = await getClient();
+    if (!client) return null;
+    return client.memory.create({
       data: {
         sessionId,
         content: memory.content,
@@ -76,7 +95,9 @@ export class DatabaseService {
 
   /** Get all memories (optionally filtered by session) */
   async getMemories(sessionId?: string) {
-    return prisma.memory.findMany({
+    const client = await getClient();
+    if (!client) return [];
+    return client.memory.findMany({
       where: sessionId ? { sessionId } : undefined,
       orderBy: { createdAt: "desc" },
     });
@@ -84,11 +105,13 @@ export class DatabaseService {
 
   /** Get a single memory by ID */
   async getMemory(id: string) {
-    return prisma.memory.findUnique({ where: { id } });
+    const client = await getClient();
+    if (!client) return null;
+    return client.memory.findUnique({ where: { id } });
   }
 
   /** Disconnect Prisma client (for graceful shutdown) */
   async disconnect() {
-    await prisma.$disconnect();
+    if (prisma) await prisma.$disconnect();
   }
 }

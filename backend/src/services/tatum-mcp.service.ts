@@ -1,10 +1,6 @@
 /**
  * Tatum MCP Service — wraps Tatum's blockchain MCP tools as AI agent capabilities.
- * Provides blockchain data queries (wallet portfolio, tx history, token info)
- * that the AI agent can use during research to enrich findings with on-chain data.
- *
- * This integrates the @tatumio/blockchain-mcp package's API client directly,
- * giving our AI agent the same capabilities as the Tatum MCP server tools.
+ * Endpoints sourced from: https://github.com/tatumio/blockchain-mcp/blob/main/src/services/data.ts
  */
 
 import { TatumApiClient } from "@tatumio/blockchain-mcp/dist/api-client.js";
@@ -25,65 +21,33 @@ export class TatumMcpService {
     });
   }
 
-  /**
-   * Get wallet portfolio — equivalent to Tatum MCP's `get_wallet_portfolio` tool.
-   * Returns token balances for a Sui address.
-   */
+  /** Get current exchange rate — /v3/tatum/rate/{symbol} */
+  async getExchangeRate(symbol = "SUI", basePair = "USD"): Promise<TatumApiResponse> {
+    return this.client.executeRequest("GET", `/v3/tatum/rate/${symbol}`, {
+      basePair,
+    });
+  }
+
+  /** Get wallet portfolio — /v4/data/wallet/portfolio */
   async getWalletPortfolio(address: string): Promise<TatumApiResponse> {
-    return this.client.executeRequest("GET", `/v4/data/portfolio`, {
-      chain: "sui",
+    return this.client.executeRequest("GET", `/v4/data/wallet/portfolio`, {
+      chain: "sui-mainnet",
       addresses: address,
+      tokenTypes: "native",
     });
   }
 
-  /**
-   * Get transaction history — equivalent to Tatum MCP's `get_transaction_history` tool.
-   * Returns recent transactions for a Sui address.
-   */
-  async getTransactionHistory(
-    address: string,
-    limit = 10
-  ): Promise<TatumApiResponse> {
+  /** Get transaction history — /v4/data/transactions */
+  async getTransactionHistory(address: string, limit = 10): Promise<TatumApiResponse> {
     return this.client.executeRequest("GET", `/v4/data/transactions`, {
-      chain: "sui",
+      chain: "sui-mainnet",
       addresses: address,
-      limit,
+      pageSize: String(limit),
     });
   }
 
-  /**
-   * Check if an address is malicious — equivalent to Tatum MCP's `check_malicious_address` tool.
-   */
+  /** Check if address is malicious — /v3/security/address/{address} */
   async checkMaliciousAddress(address: string): Promise<TatumApiResponse> {
-    return this.client.executeRequest("GET", `/v4/data/security/address`, {
-      chain: "sui",
-      address,
-    });
-  }
-
-  /**
-   * Get exchange rate for SUI — equivalent to Tatum MCP's `get_exchange_rate` tool.
-   */
-  async getExchangeRate(currency = "usd"): Promise<TatumApiResponse> {
-    return this.client.executeRequest("GET", `/v4/data/exchange-rate`, {
-      chain: "sui",
-      currency,
-    });
-  }
-
-  /**
-   * Execute a raw RPC call via Tatum Gateway — equivalent to `gateway_execute_rpc` tool.
-   * This is the core MCP tool for direct blockchain interaction.
-   */
-  async executeRpc(
-    method: string,
-    params: unknown[] = []
-  ): Promise<TatumApiResponse> {
-    return this.client.executeRequest("POST", `/v4/blockchain/node/sui`, {
-      jsonrpc: "2.0",
-      id: 1,
-      method,
-      params,
-    });
+    return this.client.executeRequest("GET", `/v3/security/address/${address}`, {});
   }
 }

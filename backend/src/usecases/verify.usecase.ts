@@ -52,8 +52,18 @@ export class VerifyUseCase {
 
     // 3. Verify on-chain transaction via Tatum RPC
     let onChainRecordExists = false;
-    if (txDigest && !txDigest.startsWith("no_kb") && !txDigest.startsWith("on_chain")) {
-      onChainRecordExists = await tatum.verifyTransaction(txDigest);
+    if (
+      txDigest &&
+      !txDigest.startsWith("on_chain") &&
+      !txDigest.startsWith("pending")
+    ) {
+      if (txDigest.startsWith("walrus:")) {
+        // Walrus blob ID as proof — verify the blob exists instead
+        const walrusBlobId = txDigest.replace("walrus:", "");
+        onChainRecordExists = await walrus.exists(walrusBlobId);
+      } else {
+        onChainRecordExists = await tatum.verifyTransaction(txDigest);
+      }
     }
 
     // 4. Check snapshot blob exists on Walrus
@@ -70,7 +80,7 @@ export class VerifyUseCase {
       // Non-critical — don't fail verification if rate fetch fails
     }
 
-    return {
+    const result = {
       isValid: blobExists && hashMatches && onChainRecordExists && snapshotExists,
       blobExists,
       hashMatches,
@@ -78,5 +88,8 @@ export class VerifyUseCase {
       snapshotExists,
       suiPriceUsd,
     };
+
+    console.log("[Verify] Result:", JSON.stringify(result));
+    return result;
   }
 }

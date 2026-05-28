@@ -2,7 +2,6 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { ChatMessage, Memory } from "@/types";
-import { MOCK_CHAT_MESSAGES, MOCK_MEMORIES, MOCK_SESSIONS } from "@/services/mock-data";
 import { research, mapApiMemoryToMemory, USE_MOCK_DATA } from "@/services/api";
 import { UI } from "@/constants";
 
@@ -20,38 +19,50 @@ interface ChatSession {
  * Calls real backend API when USE_MOCK_DATA is false.
  */
 export function useChat() {
-  const [sessions, setSessions] = useState<ChatSession[]>(() => {
-    if (typeof window === "undefined") return [];
-    const saved = localStorage.getItem("tuskbase_sessions");
-    if (saved) {
-      try { return JSON.parse(saved); } catch { /* ignore */ }
-    }
-    return [
-      {
-        id: "session_001",
-        query: "Research DeFi protocols on Sui blockchain",
-        messages: MOCK_CHAT_MESSAGES,
-        memories: MOCK_MEMORIES.filter((m) => m.sessionId === "session_001"),
-        timestamp: "2026-05-25T10:29:00Z",
-      },
-    ];
-  });
-  const [activeSessionId, setActiveSessionId] = useState<string>(() => {
-    if (typeof window === "undefined") return "session_001";
-    const saved = localStorage.getItem("tuskbase_active_session");
-    return saved ?? "session_001";
-  });
+  const defaultSessions: ChatSession[] = [
+    {
+      id: "session_default",
+      query: "New Research",
+      messages: [],
+      memories: [],
+      timestamp: new Date().toISOString(),
+    },
+  ];
+
+  const [sessions, setSessions] = useState<ChatSession[]>(defaultSessions);
+  const [activeSessionId, setActiveSessionId] = useState<string>("session_default");
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
 
-  // Persist sessions to localStorage on change
+  // Hydrate from localStorage after mount (avoids SSR mismatch)
   useEffect(() => {
+    const savedSessions = localStorage.getItem("tuskbase_sessions");
+    if (savedSessions) {
+      try {
+        const parsed = JSON.parse(savedSessions);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setSessions(parsed);
+        }
+      } catch { /* ignore corrupt data */ }
+    }
+    const savedActive = localStorage.getItem("tuskbase_active_session");
+    if (savedActive) {
+      setActiveSessionId(savedActive);
+    }
+    setHydrated(true);
+  }, []);
+
+  // Persist to localStorage on change (only after hydration)
+  useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("tuskbase_sessions", JSON.stringify(sessions));
-  }, [sessions]);
+  }, [sessions, hydrated]);
 
   useEffect(() => {
+    if (!hydrated) return;
     localStorage.setItem("tuskbase_active_session", activeSessionId);
-  }, [activeSessionId]);
+  }, [activeSessionId, hydrated]);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId);
   const messages = activeSession?.messages ?? [];
@@ -143,8 +154,7 @@ export function useChat() {
           id: `msg_${Date.now() + 1}`,
           role: "assistant",
           content:
-            "I'm researching that topic now. In production, I would search the web, summarize findings, and store each fact on Walrus with verifiable provenance.\n\nThis is a demo — real integration with MemWal, Tatum, and Walrus coming soon.",
-          memories: MOCK_MEMORIES.slice(0, 2),
+            "## 🔍 Demo Mode\n\nThis is a simulated response. Set `USE_MOCK_DATA = false` and connect to the backend for real research.\n\n> 💡 **Key Takeaway:** Real mode searches the web, extracts facts, and stores them on Walrus with verifiable provenance.",
           timestamp: new Date().toISOString(),
           sessionId: activeSessionId,
         };
@@ -186,10 +196,13 @@ export function useChat() {
           );
         })
         .catch((error) => {
+          const isTimeout = error.message?.includes("timed out");
           const errorMsg: ChatMessage = {
             id: `msg_${Date.now() + 1}`,
             role: "assistant",
-            content: `❌ Research failed: ${error.message}\n\nPlease check that the backend is running and API keys are configured.`,
+            content: isTimeout
+              ? "## ⏱️ Request Timed Out\n\nThe research is taking longer than expected. This can happen with complex queries.\n\n> Try a more specific question, or check that the backend is running."
+              : `## ❌ Research Failed\n\n**Error:** ${error.message}\n\n> Please check that the backend is running at \`${process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8080"}\` and all API keys are configured.`,
             timestamp: new Date().toISOString(),
             sessionId: activeSessionId,
           };

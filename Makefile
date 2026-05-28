@@ -11,7 +11,9 @@ help: ## Show available commands
 # Docker (full stack)
 # ---------------------------------------------------------------------------
 docker-up: ## Start all services (Backend + Frontend)
-	docker compose up -d --build
+	docker compose down
+	docker compose build --no-cache
+	docker compose up -d
 
 docker-down: ## Stop all services
 	docker compose down

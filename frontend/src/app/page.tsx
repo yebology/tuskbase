@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   Loader2,
   Brain,
@@ -36,9 +36,9 @@ import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
 
 const SUGGESTED_PROMPTS = [
-  { icon: Globe, text: "Research DeFi protocols on Sui" },
-  { icon: Sparkles, text: "What is Walrus decentralized storage?" },
-  { icon: Search, text: "Compare Sui vs Solana architecture" },
+  { icon: Globe, text: "What are the top DeFi protocols on Sui?" },
+  { icon: Sparkles, text: "Explain how Walrus decentralized storage works" },
+  { icon: Search, text: "Compare Sui vs Solana performance and architecture" },
 ];
 
 /** Research page — chat interface with session management */
@@ -346,11 +346,27 @@ function WelcomeState({
 }
 
 function LoadingIndicator() {
+  const [step, setStep] = useState(0);
+  const steps = [
+    "🔍 Searching the web...",
+    "🤖 Extracting key facts...",
+    "🐋 Storing on Walrus...",
+    "🧠 Saving to memory...",
+    "📝 Generating summary...",
+  ];
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setStep((s) => (s + 1) % steps.length);
+    }, 4000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex justify-start">
       <div className="bg-muted rounded-xl px-4 py-3 flex items-center gap-2">
         <Loader2 className="w-4 h-4 animate-spin text-primary" />
-        <span className="text-sm text-muted-foreground">Researching...</span>
+        <span className="text-sm text-muted-foreground">{steps[step]}</span>
       </div>
     </div>
   );

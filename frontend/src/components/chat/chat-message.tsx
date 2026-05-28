@@ -1,4 +1,5 @@
 import Markdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ExternalLink, User, Brain } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getTrustLabel } from "@/lib/formatters";
@@ -31,8 +32,8 @@ export function ChatMessage({ message }: ChatMessageProps) {
         {isUser ? (
           <p className="text-sm whitespace-pre-wrap">{message.content}</p>
         ) : (
-          <div className="text-sm prose prose-sm dark:prose-invert prose-p:my-1.5 prose-headings:my-2 prose-headings:text-sm prose-ul:my-1.5 prose-li:my-0.5 max-w-none">
-            <Markdown>{message.content}</Markdown>
+          <div className="text-sm prose prose-sm dark:prose-invert prose-p:my-2 prose-headings:my-3 prose-headings:text-base prose-ul:my-2 prose-li:my-0.5 prose-strong:text-foreground prose-table:my-3 prose-th:px-3 prose-th:py-1.5 prose-td:px-3 prose-td:py-1.5 prose-table:text-xs max-w-none [&>*:first-child]:mt-0">
+            <Markdown remarkPlugins={[remarkGfm]}>{message.content}</Markdown>
           </div>
         )}
 
@@ -56,12 +57,23 @@ function MemoryReferences({
 }: {
   memories: NonNullable<ChatMessageType["memories"]>;
 }) {
+  // Deduplicate sources by domain
+  const uniqueSources = memories.reduce(
+    (acc, mem) => {
+      if (!acc.find((s) => s.sourceDomain === mem.sourceDomain)) {
+        acc.push(mem);
+      }
+      return acc;
+    },
+    [] as typeof memories
+  );
+
   return (
     <div className="mt-3 pt-3 border-t border-border/30 space-y-1.5">
       <p className="text-[11px] font-medium opacity-60">
         Sources stored on Walrus:
       </p>
-      {memories.map((mem) => {
+      {uniqueSources.map((mem) => {
         const trust = getTrustLabel(mem.trustScore);
         return (
           <div

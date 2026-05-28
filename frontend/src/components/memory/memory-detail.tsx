@@ -8,6 +8,8 @@ import {
   CheckCircle2,
   XCircle,
   Loader2,
+  Copy,
+  Check,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -46,18 +48,20 @@ export function MemoryDetail({ memory }: MemoryDetailProps) {
       return () => clearTimeout(timer);
     } else {
       // Real API verification
+      let cancelled = false;
       verifyMemory(memory)
         .then((result) => {
-          setIsVerified(result.isValid);
+          if (!cancelled) setIsVerified(result.isValid);
         })
         .catch(() => {
-          setIsVerified(false);
+          if (!cancelled) setIsVerified(false);
         })
         .finally(() => {
-          setIsVerifying(false);
+          if (!cancelled) setIsVerifying(false);
         });
+      return () => { cancelled = true; };
     }
-  }, [memory.id]);
+  }, [memory]);
 
   return (
     <div className="max-w-2xl">
@@ -264,10 +268,18 @@ function VerifyRow({
   isVerified: boolean | null;
   href?: string;
 }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  };
+
   return (
     <div className="flex items-center justify-between gap-2">
       <span className="text-sm text-muted-foreground shrink-0">{label}</span>
-      <div className="flex items-center gap-2 min-w-0">
+      <div className="flex items-center gap-1.5 min-w-0">
         {href ? (
           <a
             href={href}
@@ -282,6 +294,17 @@ function VerifyRow({
             {truncateHash(value, 12)}
           </code>
         )}
+        <button
+          onClick={handleCopy}
+          className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors shrink-0"
+          aria-label={`Copy ${label}`}
+        >
+          {copied ? (
+            <Check className="w-3 h-3 text-emerald-500" />
+          ) : (
+            <Copy className="w-3 h-3" />
+          )}
+        </button>
         {isVerifying && (
           <Loader2 className="w-3.5 h-3.5 animate-spin text-muted-foreground shrink-0" />
         )}

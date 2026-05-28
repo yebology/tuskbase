@@ -295,7 +295,7 @@ function WelcomeState({
         What would you like to research?
       </h3>
       <p className="text-sm text-muted-foreground mb-8 max-w-sm">
-        I&apos;ll search 20+ sources, extract key facts, and deliver a
+        I&apos;ll search up to 20 sources, extract key facts, and deliver a
         verifiable PDF report stored on Walrus with on-chain proof.
       </p>
 
@@ -320,7 +320,7 @@ function WelcomeState({
 function LoadingIndicator() {
   const [step, setStep] = useState(0);
   const steps = [
-    "🔍 Searching 20+ sources...",
+    "🔍 Searching up to 20 sources...",
     "🤖 Extracting key facts...",
     "🧠 Storing in memory...",
     "📄 Generating PDF report...",

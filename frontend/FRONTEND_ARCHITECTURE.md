@@ -3,29 +3,31 @@
 ## Pattern: Next.js App Router + Custom Hooks + Service Layer
 
 ```
-Pages (app/) → Hooks (state + logic) → Services (API calls)
-            → Components (UI)
+Page (app/page.tsx) → Hooks (state + logic) → Services (API calls)
+                   → Components (UI)
 ```
+
+## Single Page App
+
+Tuskbase frontend is a single-page application. No routing — everything lives on `/`.
 
 ## Folder Structure
 
 ```
 frontend/src/
-├── app/                    # Next.js App Router pages
-│   ├── page.tsx            # Research (chat + sessions)
-│   └── memories/page.tsx   # Memory explorer (sessions + detail + verify)
+├── app/
+│   ├── page.tsx            # Main page (header + sessions + chat + PDF download)
+│   ├── layout.tsx          # Root layout (providers, fonts)
+│   └── globals.css         # Tailwind + theme variables
 ├── components/
 │   ├── ui/                 # shadcn/ui primitives (Button, Card, Dialog, etc.)
-│   ├── chat/               # Chat-specific (ChatMessage, ChatInput)
-│   ├── memory/             # Memory-specific (MemoryCard, MemoryDetail)
-│   └── layout/             # App shell (Sidebar, ThemeToggle, WalletProvider)
+│   ├── chat/               # ChatMessage (markdown + report download), ChatInput
+│   └── layout/             # ThemeToggle, ConnectWallet, ThemeProvider, AppProviders
 ├── hooks/
-│   ├── use-chat.ts         # Chat sessions, messages, API calls
-│   └── use-memories.ts     # Memory browsing, filtering, selection
+│   └── use-chat.ts         # Chat sessions, messages, API calls, localStorage
 ├── services/
-│   ├── api.ts              # Backend API client (fetch wrapper)
-│   └── mock-data.ts        # Mock data for development
-├── types/                  # TypeScript interfaces
+│   └── api.ts              # Backend API client (research, recall, verify, health)
+├── types/                  # TypeScript interfaces (Memory, ResearchReport, ChatMessage)
 ├── constants/              # App config, trust thresholds, nav items
 └── lib/
     ├── utils.ts            # cn() helper
@@ -33,29 +35,62 @@ frontend/src/
     └── dapp-kit.ts         # Sui wallet configuration
 ```
 
+## Layout Structure
+
+```
+┌─────────────────────────────────────────────────────┐
+│  Header (branding + Sui Devnet + wallet + theme)     │
+├──────────┬──────────────────────────────────────────┤
+│ Sessions │                                           │
+│ (toggle) │         Chat Area                         │
+│          │   (messages + PDF download button)        │
+│ + New    │                                           │
+│ session1 │                                           │
+│ session2 │         ─────────────────────             │
+│          │         Chat Input                        │
+└──────────┴──────────────────────────────────────────┘
+```
+
 ## Rules
 
-1. **Pages are thin** — they compose hooks + components, no business logic
-2. **Hooks own state** — all useState/useEffect lives in hooks, not pages
+1. **Single page** — no routing, everything on `/`
+2. **Hooks own state** — all useState/useEffect lives in hooks
 3. **Services handle API** — hooks call services, never fetch directly
-4. **Components are presentational** — they receive props, render UI
-5. **USE_MOCK_DATA flag** — in `services/api.ts`, toggle between mock and real API
+4. **Components are presentational** — receive props, render UI
+5. **Session sidebar is collapsible** — toggle via header button
 
 ## State Management
 
-- No Redux/Zustand — React state + hooks is sufficient
+- No Redux/Zustand — React state + hooks
 - Chat sessions persisted in `localStorage`
-- Memory data fetched from backend (or mock)
+- Research results (summary + report metadata) stored in session messages
+
+## Chat Message Types
+
+Messages can have:
+- `content` — markdown text (summary)
+- `report` — ResearchReport metadata (blobId, hash, txDigest, sourceCount, factCount, downloadUrl)
+
+When `report` is present, a download button is rendered below the summary.
+
+## PDF Download Flow
+
+1. User clicks "Download Research Report (PDF)"
+2. Frontend fetches blob from Walrus aggregator URL
+3. Creates a Blob with `application/pdf` content type
+4. Triggers browser download as `.pdf` file
+
+This is needed because Walrus doesn't set Content-Type headers.
 
 ## Wallet Integration
 
 - `@mysten/dapp-kit-react` for Sui wallet connection
-- Wrapped in `WalletProvider` (client-only, dynamic import with `ssr: false`)
-- Connect button in sidebar footer
+- Wrapped in `AppProviders` (client-only)
+- Connect button in header
 
 ## Styling
 
 - Tailwind CSS v4
-- shadcn/ui components (base-ui primitives)
+- shadcn/ui components
 - Dark mode via ThemeProvider (next-themes)
-- Resizable panels via `react-resizable-panels`
+- Responsive — sidebar hidden on mobile, collapsible on desktop

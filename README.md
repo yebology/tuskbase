@@ -1,6 +1,6 @@
 # 🦭 Tuskbase
 
-> **AI research agent with verifiable memory — every fact stored on Walrus with cryptographic proof of its source.**
+> **AI research agent with verifiable reports — every finding stored on Walrus with cryptographic proof on Sui.**
 
 ## 🎬 Demo Video
 
@@ -8,95 +8,59 @@
 
 ---
 
-**Tuskbase** is a verifiable knowledge agent that researches topics, stores findings on Walrus decentralized storage, and records provenance on-chain via Sui — so anyone can verify what the AI knows, where it learned it, and when.
+**Tuskbase** is a verifiable AI research agent. Ask it any question — it searches up to 20 real sources, extracts key facts, generates a professional PDF report, and records the proof on the Sui blockchain via Tatum RPC.
 
-Unlike ChatGPT or Perplexity where you just "trust" the AI, Tuskbase lets you **prove** every claim. Each memory has a source URL, content hash, timestamp on Sui, and a snapshot of the original page — all verifiable by anyone.
-
----
-
-## ✨ Overview
-
-AI agents today have two problems: they forget everything between sessions, and when they do "remember," you can't verify if what they say is true. Tuskbase solves both:
-
-- 🧠 **Persistent Memory** — Agent remembers across sessions via MemWal on Walrus
-- 🔍 **Verifiable Provenance** — Every fact has on-chain proof: source URL, content hash, timestamp
-- 📸 **Source Snapshots** — Original page content stored on Walrus as evidence
-- 📊 **Trust Scoring** — Sources rated 1-10 based on domain authority
-- 📚 **Public Knowledge Bases** — Publish and share verified research with the world
-- 🤖 **Autonomous Agent** — Uses Tatum MCP for direct blockchain interactions
+Unlike ChatGPT where sources sometimes don't even exist, Tuskbase actually visits every website and stores the evidence permanently on Walrus. Anyone can verify the report hasn't been tampered with by checking the on-chain hash.
 
 ---
 
-## 🤖 AI Agent with Blockchain Tools (Tatum MCP)
+## ✨ How It Works
 
-The agent automatically detects user intent and routes to the right tool:
-
-| User asks... | Agent uses... |
-|---|---|
-| "Research DeFi on Sui" | Tavily (web search) → Walrus → MemWal → Sui |
-| "What's the SUI price?" | Tatum MCP Data API (exchange rate) |
-| "Show portfolio of 0xabc..." | Tatum MCP Data API (wallet portfolio) |
-| "Is 0xabc... safe?" | Tatum MCP Data API (security check) |
-
-This is powered by `@tatumio/blockchain-mcp` — the AI agent uses Tatum's blockchain tools to answer on-chain queries directly.
+1. 🔎 **Ask** — Type a research question
+2. 🌐 **Search** — Agent searches up to 20 real sources via Tavily
+3. 🤖 **Extract** — AI pulls out 3-5 key facts per source with trust scores
+4. 🧠 **Remember** — Facts stored in MemWal for semantic recall
+5. 📄 **Report** — Full PDF generated (summary, findings, analysis, sources, provenance)
+6. 🐋 **Store** — PDF stored permanently on Walrus
+7. 🔗 **Prove** — Report hash recorded on Sui via Tatum RPC (1 transaction)
+8. ✅ **Verify** — Anyone can check the on-chain hash matches the PDF
 
 ---
 
 ## 🎯 Key Features
 
-### 🔍 AI Research Agent
-- Ask any research question → agent searches the web via Tavily
-- AI extracts key facts and summarizes findings
-- Each fact stored individually with full provenance chain
-- Streaming responses with source citations
+### 📄 Deep Research Reports
+- Up to 20 sources analyzed per query
+- 3-5 facts extracted per source with AI
+- Professional PDF with: executive summary, key findings, detailed analysis, sources, provenance
+- Trust scoring (1-10) based on source domain authority
 
-### 🧠 Verifiable Memory (MemWal + Walrus)
-- All memories stored on Walrus decentralized storage via MemWal SDK
-- Semantic search for relevant recall across sessions
-- End-to-end encrypted, user-owned memory
-- Content-addressable — same content = same blob ID
+### 🐋 Decentralized Storage (Walrus)
+- PDF reports stored permanently on Walrus
+- All facts stored in MemWal for semantic recall across sessions
+- Content-addressable — tamper-proof by design
 
-### 📸 Source Snapshots
-- When agent finds a source, the **full page content** is stored on Walrus
-- This proves what the source said at the time of research
-- Even if the source page changes or goes offline, the snapshot remains
+### 🔗 On-Chain Provenance (Sui)
+- 1 Sui transaction per research report
+- Stores: report hash, blob ID, timestamp
+- Anyone can verify report authenticity on-chain
+- Smart contract enforces access control and data integrity
 
-### 🔗 On-Chain Provenance (Sui Smart Contract)
-- Custom Move smart contract records every memory on-chain
-- Stores: blob ID, snapshot blob ID, source URL, content hash, trust score, timestamp
-- Anyone can verify by checking the Sui transaction
-- Knowledge bases as Sui objects owned by the researcher
-
-### 📊 Trust Scoring
-- Automatic scoring based on source domain authority
-- `.gov` / `.edu` = 10, official docs = 9, blogs = 5-6, social = 3-4
-- Visible in UI — users know which facts are most reliable
-
-### 📚 Public Knowledge Bases
-- Group memories into knowledge bases
-- Publish to make publicly verifiable
-- Anyone can browse, verify sources, and build on top
+### 🤖 AI Agent with Blockchain Tools (Tatum MCP)
+| User asks... | Agent uses... |
+|---|---|
+| "Research Walrus storage" | Tavily → OpenAI → Walrus → Sui |
+| "What's the SUI price?" | Tatum MCP Data API |
+| "Show portfolio of 0xabc..." | Tatum MCP Data API |
 
 ---
 
-## 📋 How It Works
-
-1. 🔎 **Ask** — User asks the agent to research a topic
-2. 🌐 **Search** — Agent searches the web via Tavily API
-3. 🤖 **Extract** — AI extracts key facts from each source
-4. 📸 **Snapshot** — Original page content stored on Walrus
-5. 🧠 **Remember** — Facts stored in MemWal for semantic recall
-6. 🔗 **Record** — Provenance metadata recorded on Sui via Tatum RPC
-7. ✅ **Verify** — Anyone can verify any memory's authenticity on-chain
-
----
-
-## 🧩 System Architecture
+## 🧩 Architecture
 
 ```
 ┌─────────────────────────────────────────────────────────┐
 │                  Frontend (Next.js 16)                    │
-│  Research Chat → Memory Explorer → Verify → Knowledge    │
+│              Research Chat → PDF Download                 │
 └──────────────────────┬──────────────────────────────────┘
                        │ REST API
                        ▼
@@ -104,20 +68,20 @@ This is powered by `@tatumio/blockchain-mcp` — the AI agent uses Tatum's block
 │              Backend (Hono + TypeScript)                  │
 │                                                          │
 │  ┌──────────┐  ┌──────────────┐  ┌───────────────────┐  │
-│  │ Search   │  │ AI           │  │ Provenance        │  │
-│  │ (Tavily) │  │ (OpenAI)     │  │ (Hash + Score)    │  │
+│  │ Search   │  │ AI           │  │ PDF Generator     │  │
+│  │ (Tavily) │  │ (OpenAI)     │  │ (PDFKit)          │  │
 │  └──────────┘  └──────────────┘  └───────────────────┘  │
 │                                                          │
 │  ┌──────────┐  ┌──────────────┐  ┌───────────────────┐  │
 │  │ MemWal   │  │ Walrus       │  │ Tatum             │  │
-│  │ (Memory) │  │ (Snapshots)  │  │ (Sui RPC)         │  │
+│  │ (Memory) │  │ (Storage)    │  │ (Sui RPC)         │  │
 │  └────┬─────┘  └──────┬───────┘  └────────┬──────────┘  │
 └───────┼────────────────┼──────────────────┼─────────────┘
         │                │                  │
         ▼                ▼                  ▼
 ┌──────────────┐ ┌──────────────┐  ┌──────────────────┐
 │   Walrus     │ │   Walrus     │  │   Sui Blockchain │
-│  (memories)  │ │ (snapshots)  │  │  (smart contract)│
+│  (memories)  │ │ (PDF reports)│  │  (provenance)    │
 │  via MemWal  │ │  via HTTP    │  │  via Tatum RPC   │
 └──────────────┘ └──────────────┘  └──────────────────┘
 ```
@@ -128,15 +92,15 @@ This is powered by `@tatumio/blockchain-mcp` — the AI agent uses Tatum's block
 
 | Layer | Technology |
 |-------|-----------|
-| Frontend | Next.js 16, Tailwind CSS v4, shadcn/ui, TypeScript |
-| Backend | Hono, TypeScript, Prisma, PostgreSQL, Zod validation |
-| AI | OpenAI GPT-4o-mini (intent routing + summarization) |
+| Frontend | Next.js 16, React 19, Tailwind CSS v4, shadcn/ui |
+| Backend | Hono, TypeScript, PDFKit, Prisma, PostgreSQL |
+| AI | OpenAI GPT-4o-mini (intent routing + extraction + report generation) |
 | Memory | MemWal SDK (`@mysten-incubation/memwal`) |
-| Storage | Walrus HTTP API (publisher/aggregator) |
+| Storage | Walrus HTTP API (PDF reports + snapshots) |
 | Blockchain | Sui (Move smart contracts) |
 | RPC | Tatum Sui RPC Gateway |
 | Data API | Tatum MCP (`@tatumio/blockchain-mcp`) |
-| Search | Tavily API |
+| Search | Tavily API (up to 20 sources per query) |
 | Wallet | @mysten/dapp-kit-react |
 
 ---
@@ -145,97 +109,92 @@ This is powered by `@tatumio/blockchain-mcp` — the AI agent uses Tatum's block
 
 ```
 tuskbase/
-├── frontend/                     # Frontend (Next.js)
+├── frontend/                     # Next.js — single-page research UI
 │   ├── src/
-│   │   ├── app/                  # Routes (Research, Memories, Knowledge, Verify)
+│   │   ├── app/page.tsx          # Main page (sessions + chat + PDF download)
 │   │   ├── components/
 │   │   │   ├── ui/              # shadcn/ui primitives
-│   │   │   ├── chat/           # Chat message, input
-│   │   │   ├── memory/         # Memory card, detail view
-│   │   │   └── layout/         # Sidebar, theme toggle
-│   │   ├── hooks/               # useChat, useMemories, useVerification
-│   │   ├── services/            # Mock data (replaced by real API)
-│   │   ├── types/               # TypeScript interfaces
-│   │   ├── constants/           # App config, trust thresholds
-│   │   └── lib/                 # Formatters, utilities
+│   │   │   ├── chat/           # Chat message, input, report download
+│   │   │   └── layout/         # Theme toggle, wallet connect
+│   │   ├── hooks/use-chat.ts    # Chat sessions + API calls
+│   │   ├── services/api.ts      # Backend API client
+│   │   └── types/               # TypeScript interfaces
 │   └── Makefile
-├── backend/                      # Backend (Hono)
+├── backend/                      # Hono — API + research orchestration
 │   ├── src/
 │   │   ├── config/              # Environment, constants
-│   │   ├── types/               # Domain types
 │   │   ├── services/            # External integrations
-│   │   │   ├── search.service.ts    # Tavily web search
-│   │   │   ├── ai.service.ts        # OpenAI summarization
-│   │   │   ├── walrus.service.ts    # Walrus blob storage
-│   │   │   ├── memwal.service.ts    # MemWal memory layer
-│   │   │   ├── tatum.service.ts     # Tatum Sui RPC
-│   │   │   └── provenance.service.ts # Hashing + trust scoring
-│   │   ├── usecases/            # Business logic orchestration
-│   │   │   ├── research.usecase.ts  # Search → Store → Record
+│   │   │   ├── search.service.ts    # Tavily (20 sources)
+│   │   │   ├── ai.service.ts        # OpenAI (extract + summarize + analyze)
+│   │   │   ├── pdf.service.ts       # PDFKit (report generation)
+│   │   │   ├── walrus.service.ts    # Walrus (blob storage)
+│   │   │   ├── memwal.service.ts    # MemWal (semantic memory)
+│   │   │   ├── tatum.service.ts     # Tatum Sui RPC (transactions)
+│   │   │   └── tatum-mcp.service.ts # Tatum MCP (blockchain queries)
+│   │   ├── usecases/
+│   │   │   ├── research.usecase.ts  # Search → Extract → PDF → Store → Prove
 │   │   │   ├── verify.usecase.ts    # On-chain verification
 │   │   │   └── recall.usecase.ts    # Semantic memory recall
 │   │   ├── routes/              # API endpoints
 │   │   ├── container.ts         # Dependency injection
-│   │   └── index.ts             # App entry point
+│   │   └── index.ts             # Entry point
 │   └── Makefile
-├── contracts/                    # Smart Contract (Move)
+├── contracts/                    # Move smart contract (Sui)
 │   └── tuskbase/
 │       ├── sources/
 │       │   ├── knowledge_base.move  # KB lifecycle
-│       │   └── memory.move          # Memory storage + provenance
+│       │   └── memory.move          # Memory/report provenance
 │       └── tests/
-│           └── tuskbase_tests.move  # 8 tests
-├── research/                     # Hackathon research docs
-└── README.md
+└── docker-compose.yml
 ```
 
 ---
 
 ## 🧭 How to Run
 
-### 📦 Prerequisites
+### Prerequisites
 - Node.js 18+
 - Sui CLI (for smart contract)
 - API keys: OpenAI, Tavily, Tatum
 
-### 🔨 1. Clone Repository
+### 1. Clone
 
 ```bash
 git clone https://github.com/yebology/tuskbase.git
 cd tuskbase
 ```
 
-### 🔐 2. Configure Environment
+### 2. Configure
 
 ```bash
 cp backend/.env.example backend/.env
 # Fill in: OPENAI_API_KEY, TAVILY_API_KEY, TATUM_API_KEY, MEMWAL credentials
 ```
 
-### 🚀 3. Start Backend
+### 3. Start Backend
 
 ```bash
 cd backend
 make install
 make dev
-# Server runs on http://localhost:8000
+# http://localhost:8000
 ```
 
-### 🌐 4. Start Frontend
+### 4. Start Frontend
 
 ```bash
 cd frontend
 make install
 make dev
-# App runs on http://localhost:3000
+# http://localhost:3000
 ```
 
-### ⚓ 5. Deploy Smart Contract (Testnet)
+### 5. Deploy Contract (optional)
 
 ```bash
 cd contracts/tuskbase
-sui move build
-sui client publish --gas-budget 100000000
+sui move build --build-env testnet
+sui client test-publish --gas-budget 100000000 --build-env testnet
 ```
 
 ---
@@ -244,35 +203,19 @@ sui client publish --gas-budget 100000000
 
 | Variable | Description |
 |----------|------------|
-| `PORT` | Backend server port (default: 8000) |
-| `DATABASE_URL` | PostgreSQL connection string |
-| `OPENAI_API_KEY` | OpenAI API key for GPT-4o-mini |
-| `MEMWAL_PRIVATE_KEY` | Ed25519 private key for MemWal |
-| `MEMWAL_ACCOUNT_ID` | MemWal account ID |
-| `MEMWAL_RELAYER_URL` | MemWal relayer endpoint |
-| `WALRUS_PUBLISHER_URL` | Walrus publisher for storing blobs |
-| `WALRUS_AGGREGATOR_URL` | Walrus aggregator for reading blobs |
-| `TATUM_API_KEY` | Tatum API key for Sui RPC |
-| `TATUM_SUI_RPC` | Tatum Sui RPC gateway URL |
-| `TAVILY_API_KEY` | Tavily API key for web search |
-| `TUSKBASE_PACKAGE_ID` | Deployed smart contract package ID |
-| `SUI_PRIVATE_KEY` | Sui Ed25519 private key for signing transactions |
-
----
-
-## 🗄️ Database
-
-Tuskbase uses PostgreSQL (via Prisma) to persist:
-- Research sessions and chat history
-- Memory cache (for fast access without re-fetching from Walrus)
-
-```bash
-# Start Postgres
-docker compose up postgres -d
-
-# Run migrations
-cd backend && npx prisma migrate dev --name init
-```
+| `PORT` | Backend port (default: 8000) |
+| `DATABASE_URL` | PostgreSQL connection |
+| `OPENAI_API_KEY` | OpenAI API key |
+| `MEMWAL_PRIVATE_KEY` | Ed25519 key for MemWal |
+| `MEMWAL_ACCOUNT_ID` | MemWal account |
+| `WALRUS_PUBLISHER_URL` | Walrus publisher endpoint |
+| `WALRUS_AGGREGATOR_URL` | Walrus aggregator endpoint |
+| `TATUM_API_KEY` | Tatum API key |
+| `TATUM_SUI_RPC` | Tatum Sui RPC gateway |
+| `TAVILY_API_KEY` | Tavily search API key |
+| `TUSKBASE_PACKAGE_ID` | Deployed contract package ID |
+| `SUI_PRIVATE_KEY` | Sui keypair for signing |
+| `DEFAULT_KNOWLEDGE_BASE_ID` | Default KB object ID on Sui |
 
 ---
 
@@ -280,10 +223,10 @@ cd backend && npx prisma migrate dev --name init
 
 | Method | Endpoint | Description |
 |--------|----------|------------|
-| GET | `/api/health` | Health check + service status |
-| POST | `/api/research` | Execute research query |
-| POST | `/api/memory/recall` | Recall relevant memories |
-| POST | `/api/memory/verify` | Verify memory on-chain |
+| GET | `/api/health` | Health check |
+| POST | `/api/research` | Deep research → returns summary + PDF link |
+| POST | `/api/memory/recall` | Semantic memory recall |
+| POST | `/api/memory/verify` | Verify report on-chain |
 
 ---
 
@@ -291,11 +234,11 @@ cd backend && npx prisma migrate dev --name init
 
 | Without Tuskbase | With Tuskbase |
 |------|--------|
-| AI forgets everything between sessions | Persistent memory via MemWal on Walrus |
-| "Trust me bro" — no way to verify AI claims | Every fact has on-chain proof |
-| Sources disappear or change | Source snapshots stored permanently on Walrus |
-| Knowledge locked in one platform | Public knowledge bases anyone can verify |
-| Centralized memory (AWS, Redis) | Decentralized, user-owned memory |
+| AI gives you text you have to trust | Every claim backed by real sources |
+| Sources sometimes don't exist | Agent actually visits up to 20 real websites |
+| No way to verify after the fact | On-chain hash proves report is authentic |
+| Knowledge locked in one platform | PDF + Walrus = permanent, decentralized |
+| Forgets between sessions | MemWal remembers across sessions |
 
 ---
 
@@ -309,7 +252,7 @@ cd backend && npx prisma migrate dev --name init
 
 ## ⚠️ Disclaimer
 
-Tuskbase is a hackathon project demonstrating verifiable AI memory on decentralized infrastructure. Trust scores are heuristic-based and do not guarantee content accuracy. Always verify critical information independently.
+Tuskbase is a hackathon project demonstrating verifiable AI research on decentralized infrastructure. Trust scores are heuristic-based and do not guarantee content accuracy. Always verify critical information independently.
 
 ---
 

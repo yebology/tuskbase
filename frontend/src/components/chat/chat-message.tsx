@@ -1,6 +1,6 @@
 import Markdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { ExternalLink, User, Brain } from "lucide-react";
+import { ExternalLink, User, Brain, FileDown, Shield, Database } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { getTrustLabel } from "@/lib/formatters";
 import type { ChatMessage as ChatMessageType } from "@/types";
@@ -39,6 +39,10 @@ export function ChatMessage({ message }: ChatMessageProps) {
 
         {message.memories && message.memories.length > 0 && (
           <MemoryReferences memories={message.memories} />
+        )}
+
+        {message.report && (
+          <ReportDownload report={message.report} />
         )}
       </div>
 
@@ -98,6 +102,65 @@ function MemoryReferences({
           </div>
         );
       })}
+    </div>
+  );
+}
+
+function ReportDownload({
+  report,
+}: {
+  report: NonNullable<ChatMessageType["report"]>;
+}) {
+  /** Download PDF by fetching blob and triggering browser download */
+  const handleDownload = async () => {
+    try {
+      const response = await fetch(report.reportUrl);
+      const blob = await response.blob();
+      const pdfBlob = new Blob([blob], { type: "application/pdf" });
+      const url = URL.createObjectURL(pdfBlob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `tuskbase-research-${Date.now()}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch {
+      // Fallback: open in new tab
+      window.open(report.reportUrl, "_blank");
+    }
+  };
+
+  return (
+    <div className="mt-3 pt-3 border-t border-border/30 space-y-2">
+      {/* Report stats */}
+      <div className="flex items-center gap-3 text-[11px] opacity-60">
+        <span className="flex items-center gap-1">
+          <Database className="w-3 h-3" />
+          {report.sourceCount} sources
+        </span>
+        <span>•</span>
+        <span>{report.factCount} facts</span>
+        <span>•</span>
+        <span className="flex items-center gap-1">
+          <Shield className="w-3 h-3" />
+          On-chain verified
+        </span>
+      </div>
+
+      {/* Download button */}
+      <button
+        onClick={handleDownload}
+        className="flex items-center gap-2 bg-primary/10 hover:bg-primary/20 text-primary rounded-lg px-3 py-2 text-xs font-medium transition-colors w-fit cursor-pointer"
+      >
+        <FileDown className="w-4 h-4" />
+        Download Research Report (PDF)
+      </button>
+
+      {/* Provenance info */}
+      <div className="text-[10px] opacity-40 font-mono truncate">
+        Sui Tx: {report.txDigest.slice(0, 20)}... • Walrus: {report.reportBlobId.slice(0, 16)}...
+      </div>
     </div>
   );
 }

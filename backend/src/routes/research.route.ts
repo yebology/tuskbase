@@ -42,11 +42,22 @@ export function createResearchRoute(
 
       // 2. Route based on intent
       if (intent.type === "web_research") {
-        // Standard web research flow
+        // Deep research flow — returns summary + PDF
         const result = await researchUseCase.execute(query, knowledgeBaseId);
-        console.log(`[Route] Research done: ${result.memories.length} memories`);
-        console.log(`[Route] Summary:\n${result.summary}`);
-        return c.json({ success: true, data: result });
+
+        console.log(`[Route] Research done: ${result.factCount} facts from ${result.sourceCount} sources`);
+        return c.json({
+          success: true,
+          data: {
+            summary: result.summary,
+            reportBlobId: result.reportBlobId,
+            reportHash: result.reportHash,
+            txDigest: result.txDigest,
+            sourceCount: result.sourceCount,
+            factCount: result.factCount,
+            reportUrl: result.reportUrl,
+          },
+        });
       }
 
       // Blockchain queries via Tatum MCP
@@ -107,7 +118,6 @@ export function createResearchRoute(
       return c.json({
         success: true,
         data: {
-          memories: [],
           summary,
           source: "tatum_mcp",
           intent: intent.type,

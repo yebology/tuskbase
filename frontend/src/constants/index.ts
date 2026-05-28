@@ -42,5 +42,4 @@ export const UI = {
 /** Navigation items */
 export const NAV_ITEMS = [
   { href: "/", label: "Research", icon: "MessageSquare" },
-  { href: "/memories", label: "Memories", icon: "Brain" },
 ] as const;

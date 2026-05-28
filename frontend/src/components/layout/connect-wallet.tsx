@@ -53,7 +53,7 @@ export function ConnectWallet() {
     <Button
       variant="outline"
       size="sm"
-      className="w-full text-xs h-8 gap-1.5"
+      className="text-xs h-8 gap-1.5"
       onClick={handleConnect}
     >
       <Wallet className="w-3 h-3" />

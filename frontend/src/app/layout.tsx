@@ -2,7 +2,6 @@ import type { Metadata } from "next";
 import { Inter, JetBrains_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/layout/theme-provider";
-import { Sidebar } from "@/components/layout/sidebar";
 import { AppProviders } from "@/components/layout/app-providers";
 import "./globals.css";
 
@@ -33,12 +32,11 @@ export default function RootLayout({
       className={`${inter.variable} ${jetbrainsMono.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="h-screen flex font-sans bg-background text-foreground overflow-hidden">
+      <body className="h-screen flex flex-col font-sans bg-background text-foreground overflow-hidden">
         <ThemeProvider>
           <AppProviders>
             <TooltipProvider>
-              <Sidebar />
-              <main className="flex-1 flex flex-col h-screen overflow-hidden pt-14 lg:pt-0">
+              <main className="flex-1 flex flex-col h-screen overflow-hidden">
                 {children}
               </main>
             </TooltipProvider>

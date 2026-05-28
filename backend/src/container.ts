@@ -11,6 +11,7 @@ import { TatumService } from "./services/tatum.service.js";
 import { TatumMcpService } from "./services/tatum-mcp.service.js";
 import { ProvenanceService } from "./services/provenance.service.js";
 import { DatabaseService } from "./services/database.service.js";
+import { PdfService } from "./services/pdf.service.js";
 import { ResearchUseCase } from "./usecases/research.usecase.js";
 import { VerifyUseCase } from "./usecases/verify.usecase.js";
 import { RecallUseCase } from "./usecases/recall.usecase.js";
@@ -25,6 +26,7 @@ export interface Container {
   tatumMcp: TatumMcpService;
   provenance: ProvenanceService;
   db: DatabaseService;
+  pdf: PdfService;
 
   // Use cases
   researchUseCase: ResearchUseCase;
@@ -43,6 +45,7 @@ export function createContainer(): Container {
   const tatumMcp = new TatumMcpService();
   const provenance = new ProvenanceService();
   const db = new DatabaseService();
+  const pdf = new PdfService();
 
   // Use cases (depend on services)
   const researchUseCase = new ResearchUseCase({
@@ -52,6 +55,7 @@ export function createContainer(): Container {
     memwal,
     provenance,
     tatum,
+    pdf,
   });
 
   const verifyUseCase = new VerifyUseCase({
@@ -74,6 +78,7 @@ export function createContainer(): Container {
     tatumMcp,
     provenance,
     db,
+    pdf,
     researchUseCase,
     verifyUseCase,
     recallUseCase,

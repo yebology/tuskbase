@@ -4,7 +4,7 @@
  * Switch USE_MOCK_DATA to false when backend is ready.
  */
 
-import type { Memory, VerificationResult } from "@/types";
+import type { Memory, VerificationResult, ResearchReport } from "@/types";
 
 /** Toggle this to switch between mock data and real API */
 export const USE_MOCK_DATA = false;
@@ -25,8 +25,13 @@ interface ApiResponse<T> {
 }
 
 interface ResearchResponse {
-  memories: ApiMemory[];
   summary: string;
+  reportBlobId: string;
+  reportHash: string;
+  txDigest: string;
+  sourceCount: number;
+  factCount: number;
+  reportUrl: string;
 }
 
 interface RecallResponse {
@@ -88,7 +93,7 @@ class ApiError extends Error {
 async function request<T>(
   endpoint: string,
   options: RequestInit = {},
-  timeoutMs = 120000
+  timeoutMs = 300000
 ): Promise<T> {
   const url = `${API_BASE_URL}${endpoint}`;
   const controller = new AbortController();
@@ -128,17 +133,28 @@ async function request<T>(
 // ============================================================
 
 /**
- * Execute a research query — searches web, extracts facts, stores on Walrus.
+ * Execute a research query — searches web, extracts facts, generates PDF report.
+ * Returns summary for chat + report metadata for download.
  */
 export async function research(
   query: string,
   knowledgeBaseId?: string
-): Promise<ResearchResponse> {
+): Promise<{ summary: string; report: ResearchReport }> {
   const res = await request<ApiResponse<ResearchResponse>>("/api/research", {
     method: "POST",
     body: JSON.stringify({ query, knowledgeBaseId }),
   });
-  return res.data;
+  return {
+    summary: res.data.summary,
+    report: {
+      reportBlobId: res.data.reportBlobId,
+      reportHash: res.data.reportHash,
+      txDigest: res.data.txDigest,
+      sourceCount: res.data.sourceCount,
+      factCount: res.data.factCount,
+      reportUrl: res.data.reportUrl,
+    },
+  };
 }
 
 /**

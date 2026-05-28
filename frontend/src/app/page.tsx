@@ -12,8 +12,9 @@ import {
   MoreHorizontal,
   Pencil,
   Trash2,
+  PanelLeftClose,
+  PanelLeft,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,17 +32,19 @@ import {
 } from "@/components/ui/dialog";
 import { ChatMessage } from "@/components/chat/chat-message";
 import { ChatInput } from "@/components/chat/chat-input";
+import { ThemeToggle } from "@/components/layout/theme-toggle";
+import { ConnectWallet } from "@/components/layout/connect-wallet";
 import { useChat } from "@/hooks/use-chat";
-import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { cn } from "@/lib/utils";
+import { APP_NAME } from "@/constants";
 
 const SUGGESTED_PROMPTS = [
-  { icon: Globe, text: "What are the top DeFi protocols on Sui?" },
-  { icon: Sparkles, text: "Explain how Walrus decentralized storage works" },
-  { icon: Search, text: "Compare Sui vs Solana performance and architecture" },
+  { icon: Globe, text: "What is Walrus decentralized storage and how does it work?" },
+  { icon: Sparkles, text: "Explain the Sui blockchain architecture and its advantages" },
+  { icon: Search, text: "What are the latest developments in decentralized AI agents?" },
 ];
 
-/** Research page — chat interface with session management */
+/** Single-page research app — header + session sidebar + chat */
 export default function ResearchPage() {
   const {
     sessions,
@@ -55,117 +58,123 @@ export default function ResearchPage() {
     setInput,
     isLoading,
     sendMessage,
-    memoryCount,
   } = useChat();
 
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const hasMessages = messages.length > 0;
 
   return (
-    <div className="flex h-full">
-      {/* Desktop resizable layout */}
-      <PanelGroup direction="horizontal" className="hidden lg:flex h-full">
-        <Panel defaultSize={18} minSize={14} maxSize={30}>
-          <div className="flex flex-col h-full bg-muted/30">
-            <div className="p-3">
-              <Button
-                size="sm"
-                variant="outline"
-                className="w-full gap-1.5 text-xs"
-                onClick={createSession}
-              >
-                <Plus className="w-3.5 h-3.5" />
-                New Research
-              </Button>
+    <div className="flex flex-col h-screen">
+      {/* Top header bar */}
+      <header className="h-13 border-b border-border px-4 flex items-center justify-between shrink-0 bg-background/80 backdrop-blur-sm">
+        <div className="flex items-center gap-3">
+          <Button
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            aria-label="Toggle sessions"
+            className="text-muted-foreground"
+          >
+            {sidebarOpen ? (
+              <PanelLeftClose className="w-4 h-4" />
+            ) : (
+              <PanelLeft className="w-4 h-4" />
+            )}
+          </Button>
+          <div className="flex items-center gap-2.5">
+            <div className="w-7 h-7 rounded-lg bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center">
+              <Brain className="w-3.5 h-3.5 text-primary-foreground" />
             </div>
-
-            <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
-              {sessions.map((session) => (
-                <SessionItem
-                  key={session.id}
-                  id={session.id}
-                  query={session.query}
-                  isActive={session.id === activeSessionId}
-                  onClick={() => switchSession(session.id)}
-                  onRename={(name) => renameSession(session.id, name)}
-                  onDelete={() => deleteSession(session.id)}
-                />
-              ))}
+            <div>
+              <h1 className="font-semibold text-sm tracking-tight leading-none">
+                {APP_NAME}
+              </h1>
+              <p className="text-[10px] text-muted-foreground leading-none mt-0.5">
+                Verifiable AI Research
+              </p>
             </div>
           </div>
-        </Panel>
-
-        <PanelResizeHandle className="w-1.5 bg-border/50 hover:bg-primary/30 transition-colors cursor-col-resize" />
-
-        <Panel defaultSize={82} minSize={50}>
-          <div className="flex-1 flex flex-col h-full min-w-0">
-            <ResearchHeader
-              memoryCount={memoryCount}
-              onNewSession={createSession}
-            />
-
-            <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
-              {hasMessages ? (
-                <div className="max-w-3xl mx-auto space-y-6">
-                  {messages.map((msg) => (
-                    <ChatMessage key={msg.id} message={msg} />
-                  ))}
-                  {isLoading && <LoadingIndicator />}
-                </div>
-              ) : (
-                <WelcomeState onPromptClick={(text) => setInput(text)} />
-              )}
-            </div>
-
-            <ChatInput
-              value={input}
-              onChange={setInput}
-              onSubmit={sendMessage}
-              isLoading={isLoading}
-            />
-          </div>
-        </Panel>
-      </PanelGroup>
-
-      {/* Mobile layout (no resize) */}
-      <div className="flex flex-col w-full lg:hidden">
-        <ResearchHeader
-          memoryCount={memoryCount}
-          onNewSession={createSession}
-        />
-
-        <div className="flex-1 overflow-y-auto px-4 py-4">
-          {hasMessages ? (
-            <div className="max-w-3xl mx-auto space-y-6">
-              {messages.map((msg) => (
-                <ChatMessage key={msg.id} message={msg} />
-              ))}
-              {isLoading && <LoadingIndicator />}
-            </div>
-          ) : (
-            <WelcomeState onPromptClick={(text) => setInput(text)} />
-          )}
         </div>
 
-        <ChatInput
-          value={input}
-          onChange={setInput}
-          onSubmit={sendMessage}
-          isLoading={isLoading}
-        />
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-1.5 text-[10px] text-muted-foreground px-2 py-1 rounded-md bg-muted/50">
+            <div className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+            Sui Devnet
+          </div>
+          <ConnectWallet />
+          <ThemeToggle />
+        </div>
+      </header>
+
+      {/* Main content area */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Session sidebar */}
+        <aside
+          className={cn(
+            "border-r border-border bg-muted/30 flex flex-col shrink-0 transition-all duration-200",
+            sidebarOpen ? "w-56" : "w-0 overflow-hidden border-r-0"
+          )}
+        >
+          <div className="p-3">
+            <Button
+              size="sm"
+              variant="outline"
+              className="w-full gap-1.5 text-xs"
+              onClick={createSession}
+            >
+              <Plus className="w-3.5 h-3.5" />
+              New Research
+            </Button>
+          </div>
+
+          <div className="flex-1 overflow-y-auto px-2 pb-2 space-y-0.5">
+            {sessions.map((session) => (
+              <SessionItem
+                key={session.id}
+                query={session.query}
+                isActive={session.id === activeSessionId}
+                onClick={() => switchSession(session.id)}
+                onRename={(name) => renameSession(session.id, name)}
+                onDelete={() => deleteSession(session.id)}
+              />
+            ))}
+          </div>
+        </aside>
+
+        {/* Chat area */}
+        <div className="flex-1 flex flex-col min-w-0">
+          <div className="flex-1 overflow-y-auto px-4 lg:px-6 py-4">
+            {hasMessages ? (
+              <div className="max-w-3xl mx-auto space-y-6">
+                {messages.map((msg) => (
+                  <ChatMessage key={msg.id} message={msg} />
+                ))}
+                {isLoading && <LoadingIndicator />}
+              </div>
+            ) : (
+              <WelcomeState onPromptClick={(text) => setInput(text)} />
+            )}
+          </div>
+
+          <ChatInput
+            value={input}
+            onChange={setInput}
+            onSubmit={sendMessage}
+            isLoading={isLoading}
+          />
+        </div>
       </div>
     </div>
   );
 }
 
 function SessionItem({
-  id,
   query,
   isActive,
   onClick,
   onRename,
   onDelete,
 }: {
-  id: string;
   query: string;
   isActive: boolean;
   onClick: () => void;
@@ -212,9 +221,7 @@ function SessionItem({
         </button>
 
         <DropdownMenu>
-          <DropdownMenuTrigger
-            className="opacity-0 group-hover:opacity-100 p-1 mr-1 rounded hover:bg-muted shrink-0"
-          >
+          <DropdownMenuTrigger className="opacity-0 group-hover:opacity-100 p-1 mr-1 rounded hover:bg-muted shrink-0">
             <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-32">
@@ -238,7 +245,6 @@ function SessionItem({
         </DropdownMenu>
       </div>
 
-      {/* Rename dialog */}
       <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
         <DialogContent className="sm:max-w-sm">
           <form onSubmit={handleRename}>
@@ -272,40 +278,6 @@ function SessionItem({
   );
 }
 
-function ResearchHeader({
-  memoryCount,
-  onNewSession,
-}: {
-  memoryCount: number;
-  onNewSession: () => void;
-}) {
-  return (
-    <header className="border-b border-border px-4 lg:px-6 py-3 flex items-center justify-between">
-      <div>
-        <h2 className="font-semibold tracking-tight text-sm">Research Agent</h2>
-        <p className="text-[11px] text-muted-foreground">
-          Findings stored with verifiable provenance on Walrus
-        </p>
-      </div>
-      <div className="flex items-center gap-2">
-        <Badge variant="outline" className="text-[10px] gap-1">
-          <Brain className="w-3 h-3" />
-          {memoryCount}
-        </Badge>
-        <Button
-          variant="ghost"
-          size="icon-sm"
-          className="lg:hidden"
-          onClick={onNewSession}
-          aria-label="New research"
-        >
-          <Plus className="w-4 h-4" />
-        </Button>
-      </div>
-    </header>
-  );
-}
-
 function WelcomeState({
   onPromptClick,
 }: {
@@ -323,8 +295,8 @@ function WelcomeState({
         What would you like to research?
       </h3>
       <p className="text-sm text-muted-foreground mb-8 max-w-sm">
-        I&apos;ll search the web, summarize findings, and store every fact on
-        Walrus with cryptographic proof of its source.
+        I&apos;ll search 20+ sources, extract key facts, and deliver a
+        verifiable PDF report stored on Walrus with on-chain proof.
       </p>
 
       <div className="flex flex-wrap gap-2 justify-center">
@@ -348,17 +320,18 @@ function WelcomeState({
 function LoadingIndicator() {
   const [step, setStep] = useState(0);
   const steps = [
-    "🔍 Searching the web...",
+    "🔍 Searching 20+ sources...",
     "🤖 Extracting key facts...",
+    "🧠 Storing in memory...",
+    "📄 Generating PDF report...",
     "🐋 Storing on Walrus...",
-    "🧠 Saving to memory...",
-    "📝 Generating summary...",
+    "🔗 Recording on Sui...",
   ];
 
   useEffect(() => {
     const interval = setInterval(() => {
       setStep((s) => (s + 1) % steps.length);
-    }, 4000);
+    }, 5000);
     return () => clearInterval(interval);
   }, []);
 

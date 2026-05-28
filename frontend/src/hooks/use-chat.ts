@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect } from "react";
 import type { ChatMessage, Memory } from "@/types";
-import { research, mapApiMemoryToMemory, USE_MOCK_DATA } from "@/services/api";
+import { research, USE_MOCK_DATA } from "@/services/api";
 import { UI } from "@/constants";
 
 interface ChatSession {
@@ -171,15 +171,11 @@ export function useChat() {
       // Real API call
       research(trimmed)
         .then((result) => {
-          const memories = result.memories.map((m) =>
-            mapApiMemoryToMemory(m, activeSessionId)
-          );
-
           const assistantMsg: ChatMessage = {
             id: `msg_${Date.now() + 1}`,
             role: "assistant",
             content: result.summary,
-            memories,
+            report: result.report,
             timestamp: new Date().toISOString(),
             sessionId: activeSessionId,
           };
@@ -190,7 +186,6 @@ export function useChat() {
               return {
                 ...s,
                 messages: [...s.messages, assistantMsg],
-                memories: [...s.memories, ...memories],
               };
             })
           );

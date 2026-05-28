@@ -32,5 +32,8 @@ export const WALRUS_STORAGE_EPOCHS = 10;
 /** Max memories to recall per query */
 export const DEFAULT_RECALL_LIMIT = 10;
 
-/** Max search results from Tavily */
-export const MAX_SEARCH_RESULTS = 3;
+/** Max search results from Tavily — deep research uses 20 sources */
+export const MAX_SEARCH_RESULTS = 20;
+
+/** Max facts to extract per source */
+export const MAX_FACTS_PER_SOURCE = 5;

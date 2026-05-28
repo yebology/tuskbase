@@ -15,6 +15,22 @@ export interface Memory {
   sessionId: string;
 }
 
+/** Research report metadata — returned after deep research */
+export interface ResearchReport {
+  /** Walrus blob ID of the PDF report */
+  reportBlobId: string;
+  /** SHA-256 hash of the PDF */
+  reportHash: string;
+  /** Sui transaction digest */
+  txDigest: string;
+  /** Number of sources analyzed */
+  sourceCount: number;
+  /** Number of facts extracted */
+  factCount: number;
+  /** Direct download URL for the PDF */
+  reportUrl: string;
+}
+
 /** A research session — one user query = one session */
 export interface ResearchSession {
   id: string;
@@ -28,6 +44,8 @@ export interface ChatMessage {
   role: "user" | "assistant";
   content: string;
   memories?: Memory[];
+  /** Research report attached to this message */
+  report?: ResearchReport;
   timestamp: string;
   /** Links chat message to a research session */
   sessionId?: string;

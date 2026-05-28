@@ -17,7 +17,6 @@ import { APP_NAME, APP_DESCRIPTION } from "@/constants";
 
 const NAV_ITEMS = [
   { href: "/", label: "Research", icon: MessageSquare },
-  { href: "/memories", label: "Memories", icon: Brain },
 ];
 
 export function Sidebar() {
